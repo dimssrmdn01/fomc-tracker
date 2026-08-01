@@ -26,7 +26,8 @@ CATEGORY_KEYWORDS = {
     ],
     "Inflasi": ["inflation", "cpi", "pce", "consumer price"],
     "Pasar Saham": ["stocks", "s&p", "nasdaq", "dow jones", "wall street", "equities"],
-    "Kripto": ["crypto", "bitcoin", "ethereum"],
+    "Kripto": ["crypto", "bitcoin", "ethereum", "btc", "eth", "solana", "altcoin"],
+    "Forex": ["forex", "currency", "dollar", "euro", "yen", "exchange rate", "usd/", "eur/", "jpy"],
     "Komoditas": ["oil", "gold", "commodity", "opec"],
 }
 
