@@ -40,7 +40,7 @@ def get_saved_key(name: str) -> str:
         pass
     return os.getenv(name, "")
 
-#CSS FIX: SUPER MINIMALIS 
+# --- CSS FIX: SUPER MINIMALIS & AMAN ---
 st.html("""
 <style>
     /* 1. Biarkan header tetap hidup, tapi backgroundnya dibikin transparan */
@@ -172,11 +172,12 @@ with hero_col2:
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
-# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
-with tab_calendar:
-    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
-    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
-    schedule = data.get_meeting_schedule(today)
+# -------------------------------------------------------------------------
+# TABS
+# -------------------------------------------------------------------------
+tab_news, tab_calendar, tab_history, tab_ai = st.tabs(
+    ["Berita Pasar", "FOMC & Bank Sentral", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
+)
 
 # --- TAB: Berita Pasar (general economic & financial news) --------------
 with tab_news:
@@ -298,9 +299,11 @@ with tab_news:
         elif items is not None:
             st.info("Belum ada berita untuk ditampilkan.")
 
-# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
+
+# --- TAB: FOMC & Bank Sentral -------------------------------------------
 with tab_calendar:
-    st.markdown("#### Jadwal Rapat FOMC 2026")
+    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
+    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
     schedule = data.get_meeting_schedule(today)
     for m in schedule:
         css_class = "meeting-row is-next" if m.is_next else "meeting-row"
@@ -318,6 +321,8 @@ with tab_calendar:
         )
     st.caption("Empat dari delapan rapat (Maret, Juni, September, Desember) disertai Summary of Economic Projections (dot plot).")
 
+
+# --- TAB: Riwayat Suku Bunga --------------------------------------------
 with tab_history:
     st.markdown("#### Riwayat Effective Federal Funds Rate")
     with st.spinner("Mengambil data dari FRED..."):
@@ -348,11 +353,14 @@ with tab_history:
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
-# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
-with tab_calendar:
-    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
-    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
-    schedule = data.get_meeting_schedule(today)
+
+# --- TAB: Analisis Statement FOMC ---------------------------------------
+with tab_ai:
+    st.markdown("#### Analisis Sentimen Kebijakan (The Fed)")
+    st.caption(
+        "Arah kebijakan The Fed menentukan tren pasar global. Tempel teks statement FOMC atau pidato Chair Powell, "
+        "AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish/bullish untuk aset) sampai +100 (sangat hawkish/bearish)."
+    )
 
     source_choice = st.radio(
         "Sumber teks",
@@ -452,6 +460,7 @@ with tab_calendar:
         )
         st.plotly_chart(fig_hist, use_container_width=True)
         st.caption("Riwayat ini hanya tersimpan selama sesi browser aktif dan akan hilang saat halaman di-refresh.")
+
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 st.caption(
