@@ -140,7 +140,7 @@ with hero_col1:
     st.markdown(
         f"""
 <div class="ledger-hero">
-    <div class="ledger-eyebrow">Federal Reserve &middot; Kebijakan Moneter</div>
+    <div class="ledger-eyebrow">Jangkar Makro Global &middot; Kebijakan Federal Reserve (AS)</div>
     <p class="ledger-rate">{lower:.2f}<span class="unit">%</span> &ndash; {upper:.2f}<span class="unit">%</span></p>
     <p class="ledger-sub">
         Rapat FOMC berikutnya: <strong>{next_meeting.start.strftime('%d %B') if next_meeting else '—'}
@@ -172,12 +172,11 @@ with hero_col2:
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
-# -------------------------------------------------------------------------
-# TABS
-# -------------------------------------------------------------------------
-tab_news, tab_calendar, tab_history, tab_ai = st.tabs(
-    ["Berita Pasar", "FOMC & Bank Sentral", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
-)
+# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
+with tab_calendar:
+    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
+    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
+    schedule = data.get_meeting_schedule(today)
 
 # --- TAB: Berita Pasar (general economic & financial news) --------------
 with tab_news:
@@ -349,13 +348,11 @@ with tab_history:
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
-# --- TAB: Analisis Statement FOMC (renamed from "Analisis AI") ----------
-with tab_ai:
-    st.markdown("#### Analisis Sentimen Hawkish / Dovish")
-    st.caption(
-        "Tempel teks statement FOMC (atau bagian pidato Chair), atau ambil otomatis rilis resmi terakhir. "
-        "AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish) sampai +100 (sangat hawkish)."
-    )
+# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
+with tab_calendar:
+    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
+    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
+    schedule = data.get_meeting_schedule(today)
 
     source_choice = st.radio(
         "Sumber teks",
