@@ -34,7 +34,7 @@ h1, h2, h3, .display {{ font-family: 'Fraunces', serif !important; }}
     background: radial-gradient(circle at 20% 0%, {LEDGER_GREEN_2} 0%, {LEDGER_GREEN} 55%, #081A11 100%);
     color: {CREAM_TEXT};
 }}
-#MainMenu, footer, header {{visibility: hidden;}}
+#MainMenu, footer {{visibility: hidden;}}
 .ledger-hero {{
     padding: 2.4rem 2.4rem 2rem 2.4rem;
     border-radius: 4px;
