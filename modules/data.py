@@ -48,6 +48,63 @@ FALLBACK_RATE_HISTORY = pd.DataFrame(
 
 CURRENT_TARGET_RANGE = (3.50, 3.75)  # (lower, upper) bound, %, as of Jul 2026
 
+# Multi-asset ticker strip: crypto, forex majors (+ USD/IDR for local
+# relevance), and headline stock indices. All pulled via Yahoo Finance so no
+# extra API key is needed beyond what fetch_next_meeting-style calls already use.
+MARKET_SNAPSHOT_ASSETS = [
+    {"symbol": "BTC-USD", "label": "BTC/USD", "category": "crypto"},
+    {"symbol": "ETH-USD", "label": "ETH/USD", "category": "crypto"},
+    {"symbol": "SOL-USD", "label": "SOL/USD", "category": "crypto"},
+    {"symbol": "EURUSD=X", "label": "EUR/USD", "category": "forex"},
+    {"symbol": "USDJPY=X", "label": "USD/JPY", "category": "forex"},
+    {"symbol": "USDIDR=X", "label": "USD/IDR", "category": "forex"},
+    {"symbol": "^GSPC", "label": "S&P 500", "category": "stock"},
+    {"symbol": "^IXIC", "label": "Nasdaq", "category": "stock"},
+]
+
+
+def format_price(price: float, category: str) -> str:
+    """Format a price sensibly per asset class (crypto/stock vs. forex pairs)."""
+    if category == "forex":
+        return f"{price:,.0f}" if price > 100 else f"{price:.4f}"
+    if price >= 1000:
+        return f"{price:,.0f}"
+    return f"{price:,.2f}"
+
+
+def fetch_market_snapshot() -> list[dict]:
+    """
+    Pull a quick multi-asset snapshot (crypto, forex, stock indices) via
+    Yahoo Finance for the hero ticker strip. Returns an empty list (rather
+    than raising) if the network call or any individual symbol fails, so
+    the UI can show a clear "unavailable" note instead of crashing.
+    """
+    try:
+        import yfinance as yf
+
+        symbols = [a["symbol"] for a in MARKET_SNAPSHOT_ASSETS]
+        raw = yf.download(
+            symbols, period="5d", interval="1d", group_by="ticker",
+            progress=False, threads=True, auto_adjust=True,
+        )
+
+        results = []
+        for asset in MARKET_SNAPSHOT_ASSETS:
+            try:
+                sym = asset["symbol"]
+                closes = raw[sym]["Close"].dropna() if len(symbols) > 1 else raw["Close"].dropna()
+                if len(closes) < 2:
+                    continue
+                last = float(closes.iloc[-1])
+                prev = float(closes.iloc[-2])
+                change_pct = (last - prev) / prev * 100 if prev else 0.0
+                results.append({**asset, "price": last, "change_pct": round(change_pct, 2)})
+            except Exception:
+                continue
+        return results
+    except Exception:
+        return []
+
 
 @dataclass
 class MeetingInfo:
