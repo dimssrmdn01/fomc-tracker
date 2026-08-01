@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 from modules import ai_analysis, data, news
 from modules.gauge import render_hawk_dove_gauge
 from modules.styling import (
+    BULL_GREEN,
     CREAM_TEXT,
     DOVE_BLUE,
     HAWK_RED,
@@ -23,6 +25,20 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 inject_css()
+
+
+def get_saved_key(name: str) -> str:
+    """
+    Look for an API key first in st.secrets (Streamlit Cloud), then in
+    environment variables (.env locally). Returns "" if not found, so the
+    caller can fall back to a manual sidebar input.
+    """
+    try:
+        if name in st.secrets:
+            return st.secrets[name]
+    except Exception:
+        pass
+    return os.getenv(name, "")
 
 #CSS FIX: SUPER MINIMALIS 
 st.html("""
@@ -66,10 +82,22 @@ with st.sidebar:
         "letter-spacing:0.08em; color:#B9975B;'>API Keys</p>",
         unsafe_allow_html=True,
     )
-    finnhub_api_key = st.text_input("Finnhub API Key", type="password", placeholder="c...")
-    st.caption("Dapatkan gratis di [finnhub.io/register](https://finnhub.io/register) — untuk tab Berita Pasar.")
-    groq_api_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...")
-    st.caption("Dapatkan gratis di [console.groq.com](https://console.groq.com/keys) — untuk analisis sentimen AI.")
+    saved_finnhub_key = get_saved_key("FINNHUB_API_KEY")
+    saved_groq_key = get_saved_key("GROQ_API_KEY")
+
+    if saved_finnhub_key:
+        finnhub_api_key = saved_finnhub_key
+        st.caption("✓ Finnhub API Key dimuat otomatis dari secrets/.env")
+    else:
+        finnhub_api_key = st.text_input("Finnhub API Key", type="password", placeholder="c...")
+        st.caption("Dapatkan gratis di [finnhub.io/register](https://finnhub.io/register) — untuk tab Berita Pasar.")
+
+    if saved_groq_key:
+        groq_api_key = saved_groq_key
+        st.caption("✓ Groq API Key dimuat otomatis dari secrets/.env")
+    else:
+        groq_api_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...")
+        st.caption("Dapatkan gratis di [console.groq.com](https://console.groq.com/keys) — untuk analisis sentimen AI.")
 
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown(
@@ -81,11 +109,30 @@ with st.sidebar:
     )
 
 # -------------------------------------------------------------------------
-# HERO - current rate + next meeting countdown
+# HERO - multi-asset ticker strip (crypto + forex + stocks), then FOMC rate
 # -------------------------------------------------------------------------
 today = dt.date.today()
 next_meeting = data.get_next_meeting(today)
 lower, upper = data.CURRENT_TARGET_RANGE
+
+st.markdown("##### Ringkasan Pasar &middot; Crypto, Forex & Saham")
+with st.spinner("Mengambil harga terkini..."):
+    snapshot = data.fetch_market_snapshot()
+
+if snapshot:
+    ticker_html = "".join(
+        f"""
+<div class="ticker-item">
+    <div class="ticker-symbol">{a['label']}</div>
+    <div class="ticker-price">{data.format_price(a['price'], a['category'])}</div>
+    <div class="ticker-change {'up' if a['change_pct'] >= 0 else 'down'}">{'+' if a['change_pct'] >= 0 else ''}{a['change_pct']:.2f}%</div>
+</div>
+"""
+        for a in snapshot
+    )
+    st.markdown(f'<div class="ticker-strip">{ticker_html}</div>', unsafe_allow_html=True)
+else:
+    st.caption("⚠ Data harga live tidak tersedia saat ini — coba muat ulang halaman.")
 
 hero_col1, hero_col2 = st.columns([2, 1])
 with hero_col1:
@@ -93,7 +140,7 @@ with hero_col1:
     st.markdown(
         f"""
 <div class="ledger-hero">
-    <div class="ledger-eyebrow">Federal Open Market Committee &middot; Target Range</div>
+    <div class="ledger-eyebrow">Federal Reserve &middot; Kebijakan Moneter</div>
     <p class="ledger-rate">{lower:.2f}<span class="unit">%</span> &ndash; {upper:.2f}<span class="unit">%</span></p>
     <p class="ledger-sub">
         Rapat FOMC berikutnya: <strong>{next_meeting.start.strftime('%d %B') if next_meeting else '—'}
