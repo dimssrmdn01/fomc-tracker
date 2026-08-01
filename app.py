@@ -192,24 +192,39 @@ with tab_news:
     else:
         if "news_items" not in st.session_state:
             st.session_state["news_items"] = None
+        if "news_diag" not in st.session_state:
+            st.session_state["news_diag"] = None
 
         col_refresh, col_filter = st.columns([1, 3])
         with col_refresh:
             if st.button("Muat Ulang Berita"):
                 try:
                     with st.spinner("Mengambil berita dari Finnhub..."):
-                        st.session_state["news_items"] = news.fetch_market_news(finnhub_api_key)
+                        items_, diag_ = news.fetch_market_news(finnhub_api_key)
+                    st.session_state["news_items"] = items_
+                    st.session_state["news_diag"] = diag_
                 except ValueError as e:
                     st.error(str(e))
 
         if st.session_state["news_items"] is None:
             try:
                 with st.spinner("Mengambil berita dari Finnhub..."):
-                    st.session_state["news_items"] = news.fetch_market_news(finnhub_api_key)
+                    items_, diag_ = news.fetch_market_news(finnhub_api_key)
+                st.session_state["news_items"] = items_
+                st.session_state["news_diag"] = diag_
             except ValueError as e:
                 st.error(str(e))
 
         items = st.session_state["news_items"]
+        diag = st.session_state["news_diag"]
+
+        if diag is not None:
+            with st.expander("Detail sumber data"):
+                for cat, count in diag.counts.items():
+                    if cat in diag.errors:
+                        st.caption(f"⚠ `{cat}`: gagal — {diag.errors[cat]}")
+                    else:
+                        st.caption(f"✓ `{cat}`: {count} artikel")
 
         if items:
             with col_filter:
@@ -221,6 +236,8 @@ with tab_news:
             if st.button("Analisis Sentimen Pasar", type="primary"):
                 if not groq_api_key:
                     st.error("Masukkan Groq API Key di sidebar terlebih dahulu.")
+                elif not filtered:
+                    st.error("Tidak ada berita pada kategori ini untuk dianalisis.")
                 else:
                     try:
                         with st.spinner("Menganalisis mood pasar..."):
@@ -258,6 +275,14 @@ with tab_news:
                 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
             st.markdown("##### Feed Berita")
+            if not filtered:
+                cat_error = diag.errors.get(
+                    {"Kripto": "crypto", "Forex": "forex"}.get(selected_tag, ""), None
+                ) if diag else None
+                if cat_error:
+                    st.warning(f"Gagal mengambil berita kategori '{selected_tag}' dari Finnhub: {cat_error}")
+                else:
+                    st.info(f"Belum ada berita untuk kategori '{selected_tag}' saat ini. Coba 'Muat Ulang Berita' atau pilih kategori lain.")
             for n in filtered:
                 tags_html = "".join(f'<span class="news-tag">{t}</span>' for t in n.tags)
                 st.markdown(
