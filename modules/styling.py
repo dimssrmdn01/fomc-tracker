@@ -16,8 +16,9 @@ LEDGER_GREEN_2 = "#173C27"   # slightly lighter panel green
 PARCHMENT = "#EDE6D6"        # light card / paper surface
 PARCHMENT_DIM = "#DDD3BC"
 TREASURY_GOLD = "#B9975B"    # accent, seal / foil
-HAWK_RED = "#A63D40"         # rate-hike / inflation-hawk / bearish indicator
-DOVE_BLUE = "#3E6E8E"        # rate-cut / dove / bullish indicator
+HAWK_RED = "#A63D40"         # rate-hike / inflation-hawk / bearish / price-down indicator
+DOVE_BLUE = "#3E6E8E"        # rate-cut / dove indicator
+BULL_GREEN = "#6FB98F"       # price-up / bullish indicator
 INK = "#1B1B16"
 CREAM_TEXT = "#F3EEDF"
 
@@ -225,6 +226,40 @@ section[data-testid="stSidebar"] .stTextInput input, section[data-testid="stSide
     margin-top: 0.15rem;
     line-height: 1.45;
 }}
+.ticker-strip {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+}}
+.ticker-item {{
+    flex: 1 1 140px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(185,151,91,0.18);
+    border-radius: 3px;
+    padding: 0.65rem 0.9rem;
+}}
+.ticker-symbol {{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: {TREASURY_GOLD};
+}}
+.ticker-price {{
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: {CREAM_TEXT};
+    margin-top: 0.1rem;
+}}
+.ticker-change {{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    margin-top: 0.15rem;
+}}
+.ticker-change.up {{ color: {BULL_GREEN}; }}
+.ticker-change.down {{ color: {HAWK_RED}; }}
 </style>
 """,
         unsafe_allow_html=True,
