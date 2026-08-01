@@ -24,6 +24,28 @@ st.set_page_config(
 )
 inject_css()
 
+# 
+st.html("""
+<style>
+    /* Memaksa tombol pemanggil sidebar (> ) selalu tampil, di depan, dan berwarna terang */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        color: #F3EEDF !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        z-index: 999999 !important;
+        transition: all 0.3s ease;
+    }
+    
+    /* Efek hover biar makin mulus saat disentuh mouse */
+    [data-testid="collapsedControl"]:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #B9975B !important;
+    }
+</style>
+""")
+
 # -------------------------------------------------------------------------
 # SIDEBAR
 # -------------------------------------------------------------------------
@@ -55,7 +77,7 @@ with st.sidebar:
     )
 
 # -------------------------------------------------------------------------
-# HERO — current rate + next meeting countdown
+# HERO - current rate + next meeting countdown
 # -------------------------------------------------------------------------
 today = dt.date.today()
 next_meeting = data.get_next_meeting(today)
@@ -111,15 +133,16 @@ with tab_calendar:
         css_class = "meeting-row is-next" if m.is_next else "meeting-row"
         status = "→ RAPAT BERIKUTNYA" if m.is_next else ("selesai" if m.end < today else "")
         sep_tag = '<span class="meeting-tag">SEP + Dot Plot</span>' if m.has_sep else ""
-        st.markdown(
+        
+        # 
+        st.html(
             f"""
 <div class="{css_class}">
     <div class="meeting-date">{m.start.strftime('%d %b')} &ndash; {m.end.strftime('%d %b %Y')}</div>
     {sep_tag}
     <div style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:{TREASURY_GOLD if m.is_next else '#9C9478'};">{status}</div>
 </div>
-""",
-            unsafe_allow_html=True,
+"""
         )
     st.caption("Empat dari delapan rapat (Maret, Juni, September, Desember) disertai Summary of Economic Projections (dot plot).")
 
