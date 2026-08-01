@@ -19,7 +19,7 @@
 
 **FOMC Tracker** is a dashboard for following US Federal Reserve monetary policy: the meeting calendar, historical Federal Funds Rate, market-implied move probabilities derived from Fed Funds futures, and an AI-powered hawkish/dovish sentiment score for any FOMC statement text.
 
-The visual design is deliberately grounded in the vocabulary of the subject itself — currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — rather than a generic dashboard template.
+The visual design is deliberately grounded in the vocabulary of the subject itself currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge rather than a generic dashboard template.
 
 ## Features
 
@@ -59,7 +59,7 @@ fomc-tracker/
 
 ### Prerequisites
 - Python 3.9+
-- A free Groq API key ([console.groq.com/keys](https://console.groq.com/keys)) — only needed for the AI Analysis tab
+- A free Groq API key ([console.groq.com/keys](https://console.groq.com/keys))  only needed for the AI Analysis tab
 
 ### 1. Clone the Repository
 ```bash
@@ -82,7 +82,7 @@ pip install -r requirements.txt
 ```bash
 streamlit run app.py
 ```
-The app opens at `http://localhost:8501`. Enter your Groq API key in the sidebar to use the AI Analysis tab — the calendar, rate history, and probability tabs work without any key.
+The app opens at `http://localhost:8501`. Enter your Groq API key in the sidebar to use the AI Analysis tab the calendar, rate history, and probability tabs work without any key.
 
 ## Deployment (Streamlit Community Cloud)
 
@@ -101,4 +101,4 @@ This is an educational/portfolio project. Rate probabilities and AI-generated se
 
 ## Author
 
-Built by **[isi nama kamu di sini]** — an upgraded take on an FOMC tracking concept, with a new architecture, live data sources, and AI-powered sentiment analysis.
+Built by **Dimas Arya Ramadhan**  an upgraded take on an FOMC tracking concept, with a new architecture, live data sources, and AI-powered sentiment analysis.
