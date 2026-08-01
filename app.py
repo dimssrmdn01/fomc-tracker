@@ -24,23 +24,31 @@ st.set_page_config(
 )
 inject_css()
 
-# 
+#
 st.html("""
 <style>
-    /* Memaksa tombol pemanggil sidebar (> ) selalu tampil, di depan, dan berwarna terang */
-    [data-testid="collapsedControl"] {
-        display: flex !important;
+    /* 1. Panggil balik header Streamlit biar tombol sidebar bisa numpang hidup */
+    header {
         visibility: visible !important;
-        color: #F3EEDF !important;
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
-        z-index: 999999 !important;
-        transition: all 0.3s ease;
+        background: transparent !important;
     }
     
-    /* Efek hover biar makin mulus saat disentuh mouse */
+    /* 2. Basmi tombol "Deploy" dan "Menu" di kanan atas biar tetap estetik */
+    .stAppDeployButton, [data-testid="stToolbar"] {
+        display: none !important;
+    }
+
+    /* 3. Percantik tombol sidebar-nya (kiri atas) biar warnanya nggak nyaru */
+    [data-testid="collapsedControl"] {
+        color: #F3EEDF !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 8px !important;
+        z-index: 999999 !important;
+        padding: 0.2rem !important;
+    }
+    
     [data-testid="collapsedControl"]:hover {
-        background-color: rgba(255, 255, 255, 0.2) !important;
+        background-color: rgba(255, 255, 255, 0.15) !important;
         color: #B9975B !important;
     }
 </style>
