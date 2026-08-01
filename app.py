@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from modules import ai_analysis, data, fed_wire, news
 from modules.gauge import render_hawk_dove_gauge
 from modules import styling
+from modules.styling import hex_to_rgba
 
 load_dotenv()
 
@@ -423,7 +424,7 @@ with tab_history:
             mode="lines",
             line=dict(color=theme["accent"], width=2.5),
             fill="tozeroy",
-            fillcolor=f"{theme['accent']}1a",
+            fillcolor=hex_to_rgba(theme["accent"], 0.10),
             name="Effective Fed Funds Rate",
         )
     )

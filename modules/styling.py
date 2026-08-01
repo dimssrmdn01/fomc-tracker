@@ -80,6 +80,15 @@ def get_theme(name: str) -> dict:
     return THEMES.get(name, THEMES[DEFAULT_THEME])
 
 
+def hex_to_rgba(hex_color: str, alpha: float = 1.0) -> str:
+    """Convert a #RRGGBB hex color to an rgba() string Plotly will accept
+    (Plotly's color validator rejects the CSS 8-digit hex+alpha shorthand
+    used elsewhere in this app's raw HTML/CSS)."""
+    hex_color = hex_color.lstrip("#")
+    r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
 def inject_css(theme_name: str = DEFAULT_THEME) -> dict:
     """
     Inject the CSS for the given theme and return its color dict, so the
