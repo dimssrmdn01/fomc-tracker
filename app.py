@@ -24,39 +24,24 @@ st.set_page_config(
 )
 inject_css()
 
-#CSS SAPU JAGAT UNTUK MEMANGGIL SIDEBAR KOCAK WKWKWK
+#CSS FIX: SUPER MINIMALIS 
 st.html("""
 <style>
-    /* 1. Paksa header agar selalu ada (transparan) */
-    header, [data-testid="stHeader"] {
-        visibility: visible !important;
+    /* 1. Biarkan header tetap hidup, tapi backgroundnya dibikin transparan */
+    [data-testid="stHeader"] {
         background-color: transparent !important;
-        z-index: 99999 !important;
     }
     
-    /* 2. Sembunyikan pernak-pernik kanan atas yang nggak penting */
-    .stAppDeployButton, .stDeployButton, [data-testid="stToolbar"], #MainMenu {
+    /* 2. Sembunyikan HANYA tombol Deploy (biar estetika tetap premium) */
+    .stAppDeployButton {
         display: none !important;
-        visibility: hidden !important;
     }
 
-    /* 3. Tembak SEMUA kemungkinan nama class untuk tombol sidebar */
-    [data-testid="collapsedControl"], 
-    [data-testid="stSidebarCollapsedControl"], 
-    button[kind="header"] {
-        visibility: visible !important;
-        display: flex !important;
-        opacity: 1 !important;
+    /* 3. Warnai tombol sidebar bawaan Streamlit biar kelihatan jelas (krem -> emas saat di-hover) */
+    [data-testid="stHeader"] button {
         color: #F3EEDF !important;
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
     }
-    
-    /* Hover effect */
-    [data-testid="collapsedControl"]:hover, 
-    [data-testid="stSidebarCollapsedControl"]:hover, 
-    button[kind="header"]:hover {
-        background-color: rgba(255, 255, 255, 0.25) !important;
+    [data-testid="stHeader"] button:hover {
         color: #B9975B !important;
     }
 </style>
@@ -150,7 +135,6 @@ with tab_calendar:
         status = "→ RAPAT BERIKUTNYA" if m.is_next else ("selesai" if m.end < today else "")
         sep_tag = '<span class="meeting-tag">SEP + Dot Plot</span>' if m.has_sep else ""
         
-        # 
         st.html(
             f"""
 <div class="{css_class}">
