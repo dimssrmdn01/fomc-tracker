@@ -1,11 +1,11 @@
 """
 styling.py
-Design tokens and injected CSS for the FOMC Tracker.
+Design tokens and injected CSS for Market Pulse.
 
 Design direction: grounded in the actual visual vocabulary of US monetary
-policy — currency green, treasury parchment, gold-seal accents, and the
-hawk/dove terminology analysts use for the Fed itself. Deliberately avoids
-the generic cream+terracotta / near-black+neon defaults.
+policy and financial markets — currency green, treasury parchment, gold-seal
+accents, and the hawk/dove and bull/bear terminology analysts actually use.
+Deliberately avoids the generic cream+terracotta / near-black+neon defaults.
 """
 
 import streamlit as st
@@ -16,8 +16,8 @@ LEDGER_GREEN_2 = "#173C27"   # slightly lighter panel green
 PARCHMENT = "#EDE6D6"        # light card / paper surface
 PARCHMENT_DIM = "#DDD3BC"
 TREASURY_GOLD = "#B9975B"    # accent, seal / foil
-HAWK_RED = "#A63D40"         # rate-hike / inflation-hawk indicator
-DOVE_BLUE = "#3E6E8E"        # rate-cut / dove indicator
+HAWK_RED = "#A63D40"         # rate-hike / inflation-hawk / bearish indicator
+DOVE_BLUE = "#3E6E8E"        # rate-cut / dove / bullish indicator
 INK = "#1B1B16"
 CREAM_TEXT = "#F3EEDF"
 
@@ -173,6 +173,57 @@ section[data-testid="stSidebar"] .stTextInput input, section[data-testid="stSide
     background: linear-gradient(90deg, transparent, rgba(185,151,91,0.4), transparent);
     margin: 1.6rem 0;
     border: none;
+}}
+.news-card {{
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.9rem 1rem;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid rgba(185,151,91,0.3);
+    margin-bottom: 0.5rem;
+}}
+.news-card:hover {{
+    background: rgba(185,151,91,0.07);
+}}
+.news-headline {{
+    font-family: 'Fraunces', serif;
+    font-size: 1.02rem;
+    color: {CREAM_TEXT};
+    margin: 0;
+}}
+.news-headline a {{
+    color: {CREAM_TEXT};
+    text-decoration: none;
+}}
+.news-headline a:hover {{
+    color: {TREASURY_GOLD};
+}}
+.news-meta {{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9C9478;
+}}
+.news-tag {{
+    display: inline-block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(62,110,142,0.18);
+    color: {DOVE_BLUE};
+    border: 1px solid rgba(62,110,142,0.3);
+    margin-right: 4px;
+}}
+.news-summary {{
+    font-size: 0.85rem;
+    color: #C9C1A8;
+    margin-top: 0.15rem;
+    line-height: 1.45;
 }}
 </style>
 """,
