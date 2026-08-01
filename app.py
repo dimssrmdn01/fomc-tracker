@@ -1,11 +1,4 @@
-"""
-FOMC Tracker — an upgraded, feature-rich dashboard for tracking Federal
-Reserve monetary policy: meeting calendar, historical rate chart, market-
-implied move probabilities, and AI-powered hawkish/dovish statement analysis.
-"""
-
 import datetime as dt
-
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
