@@ -5,16 +5,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
-from modules import ai_analysis, data, news
+from modules import ai_analysis, data, fed_wire, news
 from modules.gauge import render_hawk_dove_gauge
-from modules.styling import (
-    BULL_GREEN,
-    CREAM_TEXT,
-    DOVE_BLUE,
-    HAWK_RED,
-    TREASURY_GOLD,
-    inject_css,
-)
+from modules import styling
 
 load_dotenv()
 
@@ -24,7 +17,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-inject_css()
 
 
 def get_saved_key(name: str) -> str:
@@ -40,31 +32,9 @@ def get_saved_key(name: str) -> str:
         pass
     return os.getenv(name, "")
 
-# --- CSS FIX: SUPER MINIMALIS & AMAN ---
-st.html("""
-<style>
-    /* 1. Biarkan header tetap hidup, tapi backgroundnya dibikin transparan */
-    [data-testid="stHeader"] {
-        background-color: transparent !important;
-    }
-    
-    /* 2. Sembunyikan HANYA tombol Deploy (biar estetika tetap premium) */
-    .stAppDeployButton {
-        display: none !important;
-    }
-
-    /* 3. Warnai tombol sidebar bawaan Streamlit biar kelihatan jelas (krem -> emas saat di-hover) */
-    [data-testid="stHeader"] button {
-        color: #F3EEDF !important;
-    }
-    [data-testid="stHeader"] button:hover {
-        color: #B9975B !important;
-    }
-</style>
-""")
 
 # -------------------------------------------------------------------------
-# SIDEBAR
+# SIDEBAR (theme picker first, so inject_css runs before any other markup)
 # -------------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
@@ -77,6 +47,45 @@ with st.sidebar:
     )
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
+    st.markdown(
+        "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
+        "letter-spacing:0.08em; color:#B9975B;'>Tampilan</p>",
+        unsafe_allow_html=True,
+    )
+    theme_key = st.selectbox(
+        "Tema Warna",
+        options=list(styling.THEMES.keys()),
+        format_func=lambda k: styling.THEMES[k]["display_name"],
+        label_visibility="collapsed",
+    )
+
+theme = styling.inject_css(theme_key)
+
+#CSS FIX: SUPER MINIMALIS
+st.html("""
+<style>
+    /* 1. Biarkan header tetap hidup, tapi backgroundnya dibikin transparan */
+    [data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+
+    /* 2. Sembunyikan HANYA tombol Deploy (biar estetika tetap premium) */
+    .stAppDeployButton {
+        display: none !important;
+    }
+
+    /* 3. Warnai tombol sidebar bawaan Streamlit biar kelihatan jelas */
+    [data-testid="stHeader"] button {
+        color: #F3EEDF !important;
+    }
+    [data-testid="stHeader"] button:hover {
+        color: #B9975B !important;
+    }
+</style>
+""")
+
+with st.sidebar:
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown(
         "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
         "letter-spacing:0.08em; color:#B9975B;'>API Keys</p>",
@@ -104,6 +113,8 @@ with st.sidebar:
         "<p style='font-size:0.78rem; color:#9C9478;'>Berita pasar: Finnhub"
         "<br>Data historis: FRED (Federal Reserve Economic Data)"
         "<br>Probabilitas pasar: 30-Day Fed Funds Futures (CME ZQ)"
+        "<br>Kalender CPI &amp; NFP: U.S. Bureau of Labor Statistics"
+        "<br>Fed Wire: RSS resmi federalreserve.gov"
         "<br>Analisis sentimen: Llama-3.1 via Groq</p>",
         unsafe_allow_html=True,
     )
@@ -140,7 +151,7 @@ with hero_col1:
     st.markdown(
         f"""
 <div class="ledger-hero">
-    <div class="ledger-eyebrow">Jangkar Makro Global &middot; Kebijakan Federal Reserve (AS)</div>
+    <div class="ledger-eyebrow">Federal Reserve &middot; Kebijakan Moneter</div>
     <p class="ledger-rate">{lower:.2f}<span class="unit">%</span> &ndash; {upper:.2f}<span class="unit">%</span></p>
     <p class="ledger-sub">
         Rapat FOMC berikutnya: <strong>{next_meeting.start.strftime('%d %B') if next_meeting else '—'}
@@ -159,9 +170,9 @@ with hero_col2:
 <div class="parchment-card">
     <div class="label">Probabilitas Pasar &middot; Rapat Berikutnya</div>
     <div style="display:flex; justify-content:space-between; margin-top:0.6rem; font-family:'IBM Plex Mono',monospace;">
-        <div><div style="color:{DOVE_BLUE}; font-weight:600; font-size:1.1rem;">{probs['cut']}%</div><div style="font-size:0.7rem;">CUT</div></div>
+        <div><div style="color:{theme['info']}; font-weight:600; font-size:1.1rem;">{probs['cut']}%</div><div style="font-size:0.7rem;">CUT</div></div>
         <div><div style="color:#6B6250; font-weight:600; font-size:1.1rem;">{probs['hold']}%</div><div style="font-size:0.7rem;">HOLD</div></div>
-        <div><div style="color:{HAWK_RED}; font-weight:600; font-size:1.1rem;">{probs['hike']}%</div><div style="font-size:0.7rem;">HIKE</div></div>
+        <div><div style="color:{theme['down']}; font-weight:600; font-size:1.1rem;">{probs['hike']}%</div><div style="font-size:0.7rem;">HIKE</div></div>
     </div>
 </div>
 """,
@@ -175,8 +186,8 @@ st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 # -------------------------------------------------------------------------
 # TABS
 # -------------------------------------------------------------------------
-tab_news, tab_calendar, tab_history, tab_ai = st.tabs(
-    ["Berita Pasar", "FOMC & Bank Sentral", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
+tab_news, tab_calendar, tab_wire, tab_history, tab_ai = st.tabs(
+    ["Berita Pasar", "FOMC & Bank Sentral", "Fed Wire", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
 )
 
 # --- TAB: Berita Pasar (general economic & financial news) --------------
@@ -253,7 +264,8 @@ with tab_news:
                 with col_gauge:
                     st.markdown(
                         render_hawk_dove_gauge(
-                            result["score"], result["label"], left_label="BEARISH", right_label="BULLISH"
+                            result["score"], result["label"],
+                            left_label="BEARISH", right_label="BULLISH", theme=theme,
                         ),
                         unsafe_allow_html=True,
                     )
@@ -299,30 +311,105 @@ with tab_news:
         elif items is not None:
             st.info("Belum ada berita untuk ditampilkan.")
 
-
-# --- TAB: FOMC & Bank Sentral -------------------------------------------
+# --- TAB: FOMC & Bank Sentral (FOMC calendar + CPI + NFP schedules) -----
 with tab_calendar:
-    st.markdown("#### Jadwal Rapat FOMC (The Fed) 2026")
-    st.caption("Sebagai jangkar likuiditas global, keputusan suku bunga AS sangat berdampak pada aset berisiko (Saham & Kripto). Pantau rilis data makro pendukung (CPI, PPI, NFP) pada tab **Berita Pasar**.")
+    st.markdown("#### Jadwal Rapat FOMC 2026")
     schedule = data.get_meeting_schedule(today)
     for m in schedule:
         css_class = "meeting-row is-next" if m.is_next else "meeting-row"
         status = "→ RAPAT BERIKUTNYA" if m.is_next else ("selesai" if m.end < today else "")
         sep_tag = '<span class="meeting-tag">SEP + Dot Plot</span>' if m.has_sep else ""
-        
+
         st.html(
             f"""
 <div class="{css_class}">
     <div class="meeting-date">{m.start.strftime('%d %b')} &ndash; {m.end.strftime('%d %b %Y')}</div>
     {sep_tag}
-    <div style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:{TREASURY_GOLD if m.is_next else '#9C9478'};">{status}</div>
+    <div style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:{theme['accent'] if m.is_next else theme['sidebar_label']};">{status}</div>
 </div>
 """
         )
     st.caption("Empat dari delapan rapat (Maret, Juni, September, Desember) disertai Summary of Economic Projections (dot plot).")
 
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
-# --- TAB: Riwayat Suku Bunga --------------------------------------------
+    col_cpi, col_nfp = st.columns(2)
+    with col_cpi:
+        st.markdown("##### Jadwal Rilis CPI (Inflasi)")
+        cpi_schedule = data.get_release_schedule(data.CPI_CALENDAR_2026, today)
+        for r in cpi_schedule:
+            if r.days_away < -3:
+                continue
+            css_class = "meeting-row is-next" if r.is_next else "meeting-row"
+            status = "→ BERIKUTNYA" if r.is_next else ("selesai" if r.release_date < today else "")
+            st.html(
+                f"""
+<div class="{css_class}">
+    <div class="meeting-date">{r.release_date.strftime('%d %b %Y')}</div>
+    <div style="font-size:0.75rem; color:{theme['sidebar_label']};">Data {r.reference_month}</div>
+    <div style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:{theme['accent'] if r.is_next else theme['sidebar_label']};">{status}</div>
+</div>
+"""
+            )
+        st.caption("Sumber: U.S. Bureau of Labor Statistics.")
+
+    with col_nfp:
+        st.markdown("##### Jadwal Rilis NFP (Employment Situation)")
+        nfp_schedule = data.get_release_schedule(data.NFP_CALENDAR_2026, today)
+        for r in nfp_schedule:
+            if r.days_away < -3:
+                continue
+            css_class = "meeting-row is-next" if r.is_next else "meeting-row"
+            status = "→ BERIKUTNYA" if r.is_next else ("selesai" if r.release_date < today else "")
+            st.html(
+                f"""
+<div class="{css_class}">
+    <div class="meeting-date">{r.release_date.strftime('%d %b %Y')}</div>
+    <div style="font-size:0.75rem; color:{theme['sidebar_label']};">Data {r.reference_month}</div>
+    <div style="margin-left:auto; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:{theme['accent'] if r.is_next else theme['sidebar_label']};">{status}</div>
+</div>
+"""
+            )
+        st.caption("Sumber: U.S. Bureau of Labor Statistics.")
+
+# --- TAB: Fed Wire (official RSS feed + rough keyword lean) -------------
+with tab_wire:
+    st.markdown("#### Fed Wire &middot; Rilis Resmi federalreserve.gov")
+    st.caption(
+        "Feed RSS resmi rilis pers Federal Reserve. Tag Hawkish/Dovish di sini murni "
+        "hitungan kata kunci sederhana pada judul — bukan model NLP atau analisis "
+        "mendalam. Untuk penilaian AI yang sesungguhnya atas teks statement, pakai "
+        "tab 'Analisis Statement FOMC'."
+    )
+
+    if st.button("Muat Ulang Fed Wire"):
+        st.session_state.pop("fed_wire_items", None)
+
+    if "fed_wire_items" not in st.session_state:
+        try:
+            with st.spinner("Mengambil RSS feed dari federalreserve.gov..."):
+                st.session_state["fed_wire_items"] = fed_wire.fetch_fed_press_wire()
+        except ValueError as e:
+            st.session_state["fed_wire_items"] = None
+            st.error(str(e))
+
+    wire_items = st.session_state.get("fed_wire_items")
+    if wire_items:
+        for w in wire_items:
+            time_str = w.published.strftime("%d %b %Y, %H:%M") if w.published else "—"
+            st.markdown(
+                f"""
+<div class="wire-row">
+    <p class="wire-title"><a href="{w.link}" target="_blank">{w.title}</a></p>
+    <div class="wire-meta">{time_str}</div>
+    <span class="wire-lean {w.lean_class}">{w.lean}</span>
+</div>
+""",
+                unsafe_allow_html=True,
+            )
+    elif wire_items is not None:
+        st.info("Belum ada rilis untuk ditampilkan.")
+
 with tab_history:
     st.markdown("#### Riwayat Effective Federal Funds Rate")
     with st.spinner("Mengambil data dari FRED..."):
@@ -334,16 +421,16 @@ with tab_history:
             x=rate_df["date"],
             y=rate_df["rate"],
             mode="lines",
-            line=dict(color=TREASURY_GOLD, width=2.5),
+            line=dict(color=theme["accent"], width=2.5),
             fill="tozeroy",
-            fillcolor="rgba(185,151,91,0.10)",
+            fillcolor=f"{theme['accent']}1a",
             name="Effective Fed Funds Rate",
         )
     )
     fig.update_layout(
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=CREAM_TEXT, family="Inter"),
+        font=dict(color=theme["text"], family="Inter"),
         margin=dict(l=10, r=10, t=10, b=10),
         height=380,
         xaxis=dict(showgrid=False, title=None),
@@ -353,13 +440,12 @@ with tab_history:
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
-
-# --- TAB: Analisis Statement FOMC ---------------------------------------
+# --- TAB: Analisis Statement FOMC ----------------------------------------
 with tab_ai:
-    st.markdown("#### Analisis Sentimen Kebijakan (The Fed)")
+    st.markdown("#### Analisis Sentimen Hawkish / Dovish")
     st.caption(
-        "Arah kebijakan The Fed menentukan tren pasar global. Tempel teks statement FOMC atau pidato Chair Powell, "
-        "AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish/bullish untuk aset) sampai +100 (sangat hawkish/bearish)."
+        "Tempel teks statement FOMC (atau bagian pidato Chair), atau ambil otomatis rilis resmi terakhir. "
+        "AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish) sampai +100 (sangat hawkish)."
     )
 
     source_choice = st.radio(
@@ -415,7 +501,10 @@ with tab_ai:
         result = st.session_state["last_analysis"]
         col_gauge, col_detail = st.columns([1, 1.3])
         with col_gauge:
-            st.markdown(render_hawk_dove_gauge(result["score"], result["label"]), unsafe_allow_html=True)
+            st.markdown(
+                render_hawk_dove_gauge(result["score"], result["label"], theme=theme),
+                unsafe_allow_html=True,
+            )
             st.markdown('<div class="gauge-caption">Skor Sentimen Kebijakan</div>', unsafe_allow_html=True)
         with col_detail:
             st.markdown(
@@ -444,15 +533,15 @@ with tab_ai:
                 mode="lines+markers+text",
                 text=hist_df["label"],
                 textposition="top center",
-                line=dict(color=TREASURY_GOLD, width=2),
-                marker=dict(size=9, color=TREASURY_GOLD),
+                line=dict(color=theme["accent"], width=2),
+                marker=dict(size=9, color=theme["accent"]),
             )
         )
         fig_hist.add_hline(y=0, line_dash="dot", line_color="rgba(255,255,255,0.25)")
         fig_hist.update_layout(
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color=CREAM_TEXT, family="Inter"),
+            font=dict(color=theme["text"], family="Inter"),
             margin=dict(l=10, r=10, t=30, b=10),
             height=280,
             yaxis=dict(range=[-105, 105], title="Skor", gridcolor="rgba(255,255,255,0.08)"),
@@ -460,7 +549,6 @@ with tab_ai:
         )
         st.plotly_chart(fig_hist, use_container_width=True)
         st.caption("Riwayat ini hanya tersimpan selama sesi browser aktif dan akan hilang saat halaman di-refresh.")
-
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 st.caption(

@@ -107,6 +107,71 @@ def fetch_market_snapshot() -> list[dict]:
 
 
 @dataclass
+class ReleaseInfo:
+    release_date: dt.date
+    reference_month: str
+    is_next: bool
+    days_away: int
+
+
+# Official 2026 release dates, straight from the U.S. Bureau of Labor
+# Statistics schedule pages (published in advance, safe to hardcode and
+# refresh yearly — same approach as the FOMC calendar above).
+CPI_CALENDAR_2026 = [
+    {"date": "2026-01-13", "reference_month": "Desember 2025"},
+    {"date": "2026-02-13", "reference_month": "Januari 2026"},
+    {"date": "2026-03-11", "reference_month": "Februari 2026"},
+    {"date": "2026-04-10", "reference_month": "Maret 2026"},
+    {"date": "2026-05-12", "reference_month": "April 2026"},
+    {"date": "2026-06-10", "reference_month": "Mei 2026"},
+    {"date": "2026-07-14", "reference_month": "Juni 2026"},
+    {"date": "2026-08-12", "reference_month": "Juli 2026"},
+    {"date": "2026-09-11", "reference_month": "Agustus 2026"},
+    {"date": "2026-10-14", "reference_month": "September 2026"},
+    {"date": "2026-11-10", "reference_month": "Oktober 2026"},
+    {"date": "2026-12-10", "reference_month": "November 2026"},
+]
+# Source: https://www.bls.gov/schedule/news_release/cpi.htm
+
+NFP_CALENDAR_2026 = [
+    {"date": "2026-01-09", "reference_month": "Desember 2025"},
+    {"date": "2026-02-11", "reference_month": "Januari 2026"},
+    {"date": "2026-03-06", "reference_month": "Februari 2026"},
+    {"date": "2026-04-03", "reference_month": "Maret 2026"},
+    {"date": "2026-05-08", "reference_month": "April 2026"},
+    {"date": "2026-06-05", "reference_month": "Mei 2026"},
+    {"date": "2026-07-02", "reference_month": "Juni 2026"},
+    {"date": "2026-08-07", "reference_month": "Juli 2026"},
+    {"date": "2026-09-04", "reference_month": "Agustus 2026"},
+    {"date": "2026-10-02", "reference_month": "September 2026"},
+    {"date": "2026-11-06", "reference_month": "Oktober 2026"},
+    {"date": "2026-12-04", "reference_month": "November 2026"},
+]
+# Source: https://www.bls.gov/schedule/news_release/empsit.htm
+
+
+def get_release_schedule(calendar: list[dict], as_of: dt.date | None = None) -> list[ReleaseInfo]:
+    """Generic helper for any BLS-style monthly release calendar (CPI, NFP, etc.)."""
+    as_of = as_of or dt.date.today()
+    releases = []
+    next_found = False
+    for r in calendar:
+        release_date = dt.datetime.strptime(r["date"], "%Y-%m-%d").date()
+        is_next = (not next_found) and (release_date >= as_of)
+        if is_next:
+            next_found = True
+        releases.append(
+            ReleaseInfo(
+                release_date=release_date,
+                reference_month=r["reference_month"],
+                is_next=is_next,
+                days_away=(release_date - as_of).days,
+            )
+        )
+    return releases
+
+
+@dataclass
 class MeetingInfo:
     start: dt.date
     end: dt.date
