@@ -9,7 +9,7 @@ Finnhub's /news endpoint takes a `category` param with a fixed set of
 values: "general", "forex", "crypto", "merger". We pull all three relevant
 categories directly and merge them, tagging each article with the category
 it actually came from (plus a light keyword pass for finer-grained tags
-like Bank Sentral / Inflasi within the general feed). Per-category fetch
+like Bank Sentral / Makro Ekonomi within the general feed). Per-category fetch
 failures are collected as diagnostics rather than silently swallowed, so
 the UI can explain *why* a filter came up empty instead of showing nothing.
 """
@@ -31,20 +31,23 @@ FINNHUB_CATEGORIES = {
     "crypto": "Kripto",
 }
 
-# Extra keyword-based tagging applied within the "general" feed, so e.g. Fed
-# statements and inflation prints still get their own filter chip.
+# --- UPGRADE: Extra keyword-based tagging untuk Makroekonomi & CPI/PPI ---
 CATEGORY_KEYWORDS = {
     "Bank Sentral": [
         "fed", "fomc", "federal reserve", "powell", "ecb", "bank of england",
         "boe", "bank of japan", "boj", "interest rate", "rate cut", "rate hike",
         "central bank", "monetary policy",
     ],
-    "Inflasi": ["inflation", "cpi", "pce", "consumer price"],
+    "Data Makro (CPI/PPI)": [
+        "inflation", "cpi", "ppi", "pce", "consumer price", "producer price", 
+        "gdp", "nfp", "payroll", "jobless claims", "labor market", "employment", 
+        "retail sales", "economic growth", "makro"
+    ],
     "Pasar Saham": ["stocks", "s&p", "nasdaq", "dow jones", "wall street", "equities"],
-    "Komoditas": ["oil", "gold", "commodity", "opec"],
+    "Komoditas": ["oil", "gold", "commodity", "opec", "crude"],
 }
 
-ALL_TAGS = ["Semua", "Bank Sentral", "Inflasi", "Pasar Saham", "Kripto", "Forex", "Komoditas", "Umum"]
+ALL_TAGS = ["Semua", "Bank Sentral", "Data Makro (CPI/PPI)", "Pasar Saham", "Kripto", "Forex", "Komoditas", "Umum"]
 
 
 @dataclass
