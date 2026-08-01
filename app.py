@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 
-from modules import ai_analysis, data
+from modules import ai_analysis, data, news
 from modules.gauge import render_hawk_dove_gauge
 from modules.styling import (
     CREAM_TEXT,
@@ -17,7 +17,7 @@ from modules.styling import (
 load_dotenv()
 
 st.set_page_config(
-    page_title="FOMC Tracker",
+    page_title="Market Pulse",
     page_icon="◆",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -52,26 +52,29 @@ st.html("""
 # -------------------------------------------------------------------------
 with st.sidebar:
     st.markdown(
-        "<p style='font-family:Fraunces,serif; font-size:1.3rem; color:#F3EEDF; margin-bottom:0;'>FOMC Tracker</p>",
+        "<p style='font-family:Fraunces,serif; font-size:1.3rem; color:#F3EEDF; margin-bottom:0;'>Market Pulse</p>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<p style='color:#9C9478; font-size:0.8rem; margin-top:0;'>Federal Reserve policy dashboard</p>",
+        "<p style='color:#9C9478; font-size:0.8rem; margin-top:0;'>Economic & financial markets dashboard</p>",
         unsafe_allow_html=True,
     )
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
     st.markdown(
         "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
-        "letter-spacing:0.08em; color:#B9975B;'>AI Analysis Config</p>",
+        "letter-spacing:0.08em; color:#B9975B;'>API Keys</p>",
         unsafe_allow_html=True,
     )
+    finnhub_api_key = st.text_input("Finnhub API Key", type="password", placeholder="c...")
+    st.caption("Dapatkan gratis di [finnhub.io/register](https://finnhub.io/register) — untuk tab Berita Pasar.")
     groq_api_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...")
-    st.caption("Dapatkan gratis di [console.groq.com](https://console.groq.com/keys)")
+    st.caption("Dapatkan gratis di [console.groq.com](https://console.groq.com/keys) — untuk analisis sentimen AI.")
 
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown(
-        "<p style='font-size:0.78rem; color:#9C9478;'>Data historis: FRED (Federal Reserve Economic Data)"
+        "<p style='font-size:0.78rem; color:#9C9478;'>Berita pasar: Finnhub"
+        "<br>Data historis: FRED (Federal Reserve Economic Data)"
         "<br>Probabilitas pasar: 30-Day Fed Funds Futures (CME ZQ)"
         "<br>Analisis sentimen: Llama-3.1 via Groq</p>",
         unsafe_allow_html=True,
@@ -125,8 +128,106 @@ st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 # -------------------------------------------------------------------------
 # TABS
 # -------------------------------------------------------------------------
-tab_calendar, tab_history, tab_ai = st.tabs(["Kalender Rapat", "Riwayat Suku Bunga", "Analisis AI"])
+tab_news, tab_calendar, tab_history, tab_ai = st.tabs(
+    ["Berita Pasar", "FOMC & Bank Sentral", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
+)
 
+# --- TAB: Berita Pasar (general economic & financial news) --------------
+with tab_news:
+    st.markdown("#### Berita Ekonomi & Pasar Finansial")
+    st.caption(
+        "Feed berita terkini dari Finnhub, otomatis ditandai per topik. "
+        "Klik 'Analisis Sentimen Pasar' untuk penilaian AI atas mood pasar secara keseluruhan."
+    )
+
+    if not finnhub_api_key:
+        st.info("Masukkan Finnhub API key di sidebar untuk memuat berita terkini.")
+    else:
+        if "news_items" not in st.session_state:
+            st.session_state["news_items"] = None
+
+        col_refresh, col_filter = st.columns([1, 3])
+        with col_refresh:
+            if st.button("Muat Ulang Berita"):
+                try:
+                    with st.spinner("Mengambil berita dari Finnhub..."):
+                        st.session_state["news_items"] = news.fetch_market_news(finnhub_api_key)
+                except ValueError as e:
+                    st.error(str(e))
+
+        if st.session_state["news_items"] is None:
+            try:
+                with st.spinner("Mengambil berita dari Finnhub..."):
+                    st.session_state["news_items"] = news.fetch_market_news(finnhub_api_key)
+            except ValueError as e:
+                st.error(str(e))
+
+        items = st.session_state["news_items"]
+
+        if items:
+            with col_filter:
+                selected_tag = st.radio(
+                    "Filter topik", news.ALL_TAGS, horizontal=True, label_visibility="collapsed"
+                )
+            filtered = news.filter_by_tag(items, selected_tag)
+
+            if st.button("Analisis Sentimen Pasar", type="primary"):
+                if not groq_api_key:
+                    st.error("Masukkan Groq API Key di sidebar terlebih dahulu.")
+                else:
+                    try:
+                        with st.spinner("Menganalisis mood pasar..."):
+                            headlines = [n.headline for n in filtered[:40]]
+                            result = ai_analysis.analyze_news_sentiment(headlines, groq_api_key)
+                        st.session_state["news_sentiment"] = result
+                    except ValueError as e:
+                        st.error(str(e))
+
+            if "news_sentiment" in st.session_state:
+                result = st.session_state["news_sentiment"]
+                col_gauge, col_detail = st.columns([1, 1.3])
+                with col_gauge:
+                    st.markdown(
+                        render_hawk_dove_gauge(
+                            result["score"], result["label"], left_label="BEARISH", right_label="BULLISH"
+                        ),
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown('<div class="gauge-caption">Skor Sentimen Pasar</div>', unsafe_allow_html=True)
+                with col_detail:
+                    st.markdown(
+                        f"""
+<div class="parchment-card">
+    <div class="label">Ringkasan</div>
+    <p style="margin-top:0.5rem; line-height:1.5;">{result['summary']}</p>
+    <div class="label" style="margin-top:1rem;">Frasa Kunci</div>
+    <ul style="margin-top:0.4rem;">
+        {''.join(f'<li>{p}</li>' for p in result['key_phrases'])}
+    </ul>
+</div>
+""",
+                        unsafe_allow_html=True,
+                    )
+                st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+
+            st.markdown("##### Feed Berita")
+            for n in filtered:
+                tags_html = "".join(f'<span class="news-tag">{t}</span>' for t in n.tags)
+                st.markdown(
+                    f"""
+<div class="news-card">
+    <div class="news-meta">{n.source} &middot; {n.datetime.strftime('%d %b %Y, %H:%M')}</div>
+    <p class="news-headline"><a href="{n.url}" target="_blank">{n.headline}</a></p>
+    <div>{tags_html}</div>
+    {f'<p class="news-summary">{n.summary}</p>' if n.summary else ''}
+</div>
+""",
+                    unsafe_allow_html=True,
+                )
+        elif items is not None:
+            st.info("Belum ada berita untuk ditampilkan.")
+
+# --- TAB: FOMC & Bank Sentral (renamed from "Kalender Rapat") -----------
 with tab_calendar:
     st.markdown("#### Jadwal Rapat FOMC 2026")
     schedule = data.get_meeting_schedule(today)
@@ -176,6 +277,7 @@ with tab_history:
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
+# --- TAB: Analisis Statement FOMC (renamed from "Analisis AI") ----------
 with tab_ai:
     st.markdown("#### Analisis Sentimen Hawkish / Dovish")
     st.caption(
@@ -284,6 +386,6 @@ with tab_ai:
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 st.caption(
-    "FOMC Tracker adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, "
+    "Market Pulse adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, "
     "bukan nasihat investasi. Selalu verifikasi keputusan kebijakan resmi di federalreserve.gov."
 )
