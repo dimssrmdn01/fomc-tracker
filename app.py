@@ -24,31 +24,39 @@ st.set_page_config(
 )
 inject_css()
 
-#
+#CSS SAPU JAGAT UNTUK MEMANGGIL SIDEBAR KOCAK WKWKWK
 st.html("""
 <style>
-    /* 1. Panggil balik header Streamlit biar tombol sidebar bisa numpang hidup */
-    header {
+    /* 1. Paksa header agar selalu ada (transparan) */
+    header, [data-testid="stHeader"] {
         visibility: visible !important;
-        background: transparent !important;
+        background-color: transparent !important;
+        z-index: 99999 !important;
     }
     
-    /* 2. Basmi tombol "Deploy" dan "Menu" di kanan atas biar tetap estetik */
-    .stAppDeployButton, [data-testid="stToolbar"] {
+    /* 2. Sembunyikan pernak-pernik kanan atas yang nggak penting */
+    .stAppDeployButton, .stDeployButton, [data-testid="stToolbar"], #MainMenu {
         display: none !important;
+        visibility: hidden !important;
     }
 
-    /* 3. Percantik tombol sidebar-nya (kiri atas) biar warnanya nggak nyaru */
-    [data-testid="collapsedControl"] {
+    /* 3. Tembak SEMUA kemungkinan nama class untuk tombol sidebar */
+    [data-testid="collapsedControl"], 
+    [data-testid="stSidebarCollapsedControl"], 
+    button[kind="header"] {
+        visibility: visible !important;
+        display: flex !important;
+        opacity: 1 !important;
         color: #F3EEDF !important;
-        background-color: rgba(255, 255, 255, 0.05) !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
         border-radius: 8px !important;
-        z-index: 999999 !important;
-        padding: 0.2rem !important;
     }
     
-    [data-testid="collapsedControl"]:hover {
-        background-color: rgba(255, 255, 255, 0.15) !important;
+    /* Hover effect */
+    [data-testid="collapsedControl"]:hover, 
+    [data-testid="stSidebarCollapsedControl"]:hover, 
+    button[kind="header"]:hover {
+        background-color: rgba(255, 255, 255, 0.25) !important;
         color: #B9975B !important;
     }
 </style>
@@ -292,6 +300,6 @@ with tab_ai:
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 st.caption(
-    "FOMC Tracker adalah proyek edukasi/portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, "
+    "FOMC Tracker adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, "
     "bukan nasihat investasi. Selalu verifikasi keputusan kebijakan resmi di federalreserve.gov."
 )
