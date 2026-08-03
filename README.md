@@ -15,13 +15,13 @@
 
 </div>
 
-## Overview
+##  Overview
 
 **FOMC Tracker** is a dashboard for following US Federal Reserve monetary policy: the meeting calendar, historical Federal Funds Rate, market-implied move probabilities derived from Fed Funds futures, and an AI-powered hawkish/dovish sentiment score for any FOMC statement text.
 
 The visual design is deliberately grounded in the vocabulary of the subject itself currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge rather than a generic dashboard template.
 
-## Features
+##  Features
 
 | Feature | Description |
 |---|---|
@@ -31,7 +31,7 @@ The visual design is deliberately grounded in the vocabulary of the subject itse
 | **AI Sentiment Analysis** | Paste any FOMC statement or speech excerpt; Llama-3.1 (via Groq) scores it -100 to +100 on a hawkish-dovish scale and explains why |
 | **Hawk-Dove Gauge** | A custom SVG instrument gauge visualizing the AI sentiment score |
 
-## Tech Stack
+##  Tech Stack
 
 - **Frontend:** Streamlit, custom CSS (Fraunces + Inter + IBM Plex Mono)
 - **Data:** FRED (Federal Reserve Economic Data), Yahoo Finance (Fed Funds futures)
