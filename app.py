@@ -180,7 +180,7 @@ with hero_col2:
         unsafe_allow_html=True,
     )
     if probs["source"] == "fallback":
-        st.caption("⚠ Data futures live tidak tersedia — menampilkan estimasi cadangan.")
+        st.caption("⚠ Data futures live tidak tersedia - menampilkan estimasi cadangan.")
 
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
@@ -415,6 +415,45 @@ with tab_history:
     st.markdown("#### Riwayat Effective Federal Funds Rate")
     with st.spinner("Mengambil data dari FRED..."):
         rate_df = data.fetch_fed_funds_rate_history(lookback_days=730)
+
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
+
+    #backtest
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+    st.markdown("#### Backtest Akurasi Pasar (Fed Funds Futures)")
+    st.caption(
+        "Mengevaluasi seberapa akurat tebakan pasar (menggunakan harga penutupan instrumen ZQ=F satu hari sebelum rapat) "
+        "dibandingkan dengan keputusan suku bunga aktual yang diambil oleh FOMC."
+    )
+
+    if st.button("Jalankan Backtest Historis"):
+        with st.spinner("Menarik data historis dari Yahoo Finance dan menghitung akurasi..."):
+            bt_df, bt_accuracy = data.run_fomc_backtest()
+            
+            if not bt_df.empty:
+                col_acc, col_space = st.columns([1, 3])
+                with col_acc:
+                    st.markdown(
+                        f"""
+                        <div class="parchment-card" style="text-align: center;">
+                            <div class="label">Akurasi Historis Pasar</div>
+                            <div style="color:{theme['info']}; font-size:2rem; font-weight:700;">
+                                {bt_accuracy:.1f}%
+                            </div>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.dataframe(
+                    bt_df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.error("Gagal mengambil data historis untuk backtest.")
 
     fig = go.Figure()
     fig.add_trace(

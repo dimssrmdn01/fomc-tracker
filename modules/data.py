@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 import requests
+import yfinance as yf
 
 FRED_SERIES_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
 
@@ -366,3 +367,71 @@ def estimate_move_probabilities(current_upper: float = CURRENT_TARGET_RANGE[1]) 
             "source": "fallback",
             "implied_rate": None,
         }
+
+# Fakta sejarah keputusan FOMC (Ground Truth)
+HISTORICAL_FOMC = [
+    {"date": "2023-07-26", "action": "hike", "prev_rate": 5.25},
+    {"date": "2023-09-20", "action": "hold", "prev_rate": 5.50},
+    {"date": "2023-11-01", "action": "hold", "prev_rate": 5.50},
+    {"date": "2023-12-13", "action": "hold", "prev_rate": 5.50},
+    {"date": "2024-01-31", "action": "hold", "prev_rate": 5.50},
+    {"date": "2024-03-20", "action": "hold", "prev_rate": 5.50},
+    {"date": "2024-05-01", "action": "hold", "prev_rate": 5.50},
+    {"date": "2024-06-12", "action": "hold", "prev_rate": 5.50},
+]
+
+def run_fomc_backtest():
+    """
+    Menjalankan backtest dengan membandingkan harga ZQ=F H-1 
+    dengan keputusan asli The Fed.
+    """
+    results = []
+    correct_predictions = 0
+
+    for meeting in HISTORICAL_FOMC:
+        target_date = dt.datetime.strptime(meeting["date"], "%Y-%m-%d").date()
+        
+        # Mundur 1-3 hari untuk mencari hari kerja (harga penutupan pasar terakhir)
+        h_minus_1 = target_date - dt.timedelta(days=1)
+        start_fetch = h_minus_1 - dt.timedelta(days=4)
+        
+        try:
+            # Tarik data dari Yahoo Finance
+            ticker = yf.Ticker("ZQ=F")
+            df = ticker.history(start=start_fetch, end=target_date)
+            
+            if df.empty:
+                continue
+                
+            # Ambil harga penutupan terakhir sebelum rapat
+            last_price = df['Close'].iloc[-1]
+            implied_rate = 100 - last_price
+            
+            # Logika sederhana prediksi pasar
+            rate_diff = implied_rate - meeting["prev_rate"]
+            
+            if rate_diff > 0.125:
+                market_prediction = "hike"
+            elif rate_diff < -0.125:
+                market_prediction = "cut"
+            else:
+                market_prediction = "hold"
+                
+            is_correct = market_prediction == meeting["action"]
+            if is_correct:
+                correct_predictions += 1
+                
+            results.append({
+                "Tanggal Rapat": meeting["date"],
+                "Harga ZQ=F (H-1)": round(last_price, 3),
+                "Implied Rate": f"{round(implied_rate, 3)}%",
+                "Prediksi Pasar": market_prediction.upper(),
+                "Keputusan Asli": meeting["action"].upper(),
+                "Status": "✅ Akurat" if is_correct else "❌ Meleset"
+            })
+            
+        except Exception:
+            continue
+            
+    accuracy = (correct_predictions / len(results)) * 100 if results else 0
+    return pd.DataFrame(results), accuracy
