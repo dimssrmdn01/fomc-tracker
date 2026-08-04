@@ -50,20 +50,19 @@ FALLBACK_RATE_HISTORY = pd.DataFrame(
 
 CURRENT_TARGET_RANGE = (3.50, 3.75)  # (lower, upper) bound, %, as of Jul 2026
 
-# Multi-asset ticker strip: crypto, forex majors (+ USD/IDR for local
-# relevance), and headline stock indices. All pulled via Yahoo Finance so no
-# extra API key is needed beyond what fetch_next_meeting-style calls already use.
-MARKET_SNAPSHOT_ASSETS = [
-    {"symbol": "BTC-USD", "label": "BTC/USD", "category": "crypto"},
-    {"symbol": "ETH-USD", "label": "ETH/USD", "category": "crypto"},
-    {"symbol": "SOL-USD", "label": "SOL/USD", "category": "crypto"},
-    {"symbol": "EURUSD=X", "label": "EUR/USD", "category": "forex"},
-    {"symbol": "USDJPY=X", "label": "USD/JPY", "category": "forex"},
-    {"symbol": "USDIDR=X", "label": "USD/IDR", "category": "forex"},
-    {"symbol": "^GSPC", "label": "S&P 500", "category": "stock"},
-    {"symbol": "^IXIC", "label": "Nasdaq", "category": "stock"},
-]
-
+# Multi-asset ticker strip: crypto, forex majors 
+AVAILABLE_ASSETS = {
+    "BTC/USD": {"symbol": "BTC-USD", "category": "crypto"},
+    "ETH/USD": {"symbol": "ETH-USD", "category": "crypto"},
+    "SOL/USD": {"symbol": "SOL-USD", "category": "crypto"},
+    "EUR/USD": {"symbol": "EURUSD=X", "category": "forex"},
+    "USD/JPY": {"symbol": "USDJPY=X", "category": "forex"},
+    "USD/IDR": {"symbol": "USDIDR=X", "category": "forex"},
+    "S&P 500": {"symbol": "^GSPC", "category": "stock"},
+    "Nasdaq": {"symbol": "^IXIC", "category": "stock"},
+    "Emas (Gold)": {"symbol": "GC=F", "category": "commodity"},
+    "Minyak (WTI)": {"symbol": "CL=F", "category": "commodity"}
+}
 
 def format_price(price: float, category: str) -> str:
     """Format a price sensibly per asset class (crypto/stock vs. forex pairs)."""
@@ -74,24 +73,34 @@ def format_price(price: float, category: str) -> str:
     return f"{price:,.2f}"
 
 @st.cache_data(ttl=300)
-def fetch_market_snapshot() -> list[dict]:
+def fetch_market_snapshot(selected_labels=None) -> list[dict]:
     """
-    Pull a quick multi-asset snapshot (crypto, forex, stock indices) via
-    Yahoo Finance for the hero ticker strip. Returns an empty list (rather
-    than raising) if the network call or any individual symbol fails, so
-    the UI can show a clear "unavailable" note instead of crashing.
+    Pull a quick multi-asset snapshot via Yahoo Finance for the hero ticker strip,
+    filtered by user selection.
     """
+    if not selected_labels:
+        selected_labels = ["BTC/USD", "Emas (Gold)", "EUR/USD", "S&P 500"]
+
     try:
         import yfinance as yf
 
-        symbols = [a["symbol"] for a in MARKET_SNAPSHOT_ASSETS]
+        # Filter aset berdasarkan pilihan dropdown
+        assets_to_fetch = [
+            {"label": label, **AVAILABLE_ASSETS[label]}
+            for label in selected_labels if label in AVAILABLE_ASSETS
+        ]
+
+        if not assets_to_fetch:
+            return []
+
+        symbols = [a["symbol"] for a in assets_to_fetch]
         raw = yf.download(
             symbols, period="5d", interval="1d", group_by="ticker",
             progress=False, threads=True, auto_adjust=True,
         )
 
         results = []
-        for asset in MARKET_SNAPSHOT_ASSETS:
+        for asset in assets_to_fetch:
             try:
                 sym = asset["symbol"]
                 closes = raw[sym]["Close"].dropna() if len(symbols) > 1 else raw["Close"].dropna()
@@ -437,7 +446,7 @@ def run_fomc_backtest():
     accuracy = (correct_predictions / len(results)) * 100 if results else 0
     return pd.DataFrame(results), accuracy
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600)        
 def fetch_correlation_data(lookback_days=180):
 
     tickers = {

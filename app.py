@@ -111,13 +111,20 @@ with st.sidebar:
 
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown(
-        "<p style='font-size:0.78rem; color:#9C9478;'>Berita pasar: Finnhub"
-        "<br>Data historis: FRED (Federal Reserve Economic Data)"
-        "<br>Probabilitas pasar: 30-Day Fed Funds Futures (CME ZQ)"
-        "<br>Kalender CPI &amp; NFP: U.S. Bureau of Labor Statistics"
-        "<br>Fed Wire: RSS resmi federalreserve.gov"
-        "<br>Analisis sentimen: Llama-3.1 via Groq</p>",
+        "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
+        "letter-spacing:0.08em; color:#B9975B;'>Watchlist Personal</p>",
         unsafe_allow_html=True,
+    )
+    
+    # Menyiapkan opsi dari data.py
+    available_options = list(data.AVAILABLE_ASSETS.keys())
+    default_options = ["Bitcoin", "Emas", "EUR/USD", "S&P 500"]
+    
+    selected_assets = st.multiselect(
+        "Pilih aset yang ingin dipantau di header:",
+        options=available_options,
+        default=default_options,
+        label_visibility="collapsed"
     )
 
 # -------------------------------------------------------------------------
@@ -129,7 +136,7 @@ lower, upper = data.CURRENT_TARGET_RANGE
 
 st.markdown("##### Ringkasan Pasar &middot; Crypto, Forex & Saham")
 with st.spinner("Mengambil harga terkini..."):
-    snapshot = data.fetch_market_snapshot()
+    snapshot = data.fetch_market_snapshot(selected_assets)
 
 if snapshot:
     ticker_html = "".join(
