@@ -449,13 +449,26 @@ def fetch_correlation_data(lookback_days=180):
     end_date = dt.date.today()
     start_date = end_date - dt.timedelta(days=lookback_days)
     
-    try:
-        df = yf.download(list(tickers.values()), start=start_date, end=end_date)['Close']
-        
-        inv_tickers = {v: k for k, v in tickers.items()}
-        df = df.rename(columns=inv_tickers)
-        returns = df.pct_change().dropna()
-        corr_matrix = returns.corr()
-        return corr_matrix
-    except Exception:
-        return pd.DataFrame()
+    df_list = []
+    for name, ticker in tickers.items():
+        try:
+            t = yf.Ticker(ticker)
+            hist = t.history(start=start_date, end=end_date)
+            if not hist.empty:
+                hist.index = hist.index.tz_localize(None).normalize()
+                close_price = hist['Close'].rename(name)
+                df_list.append(close_price)
+        except Exception:
+            continue
+            
+    if df_list:
+        try:
+            price_df = pd.concat(df_list, axis=1)
+            price_df = price_df.ffill().dropna()
+            returns_df = price_df.pct_change().dropna()
+            corr_matrix = returns_df.corr()
+            return corr_matrix
+        except Exception:
+            return pd.DataFrame()
+            
+    return pd.DataFrame()
