@@ -416,10 +416,32 @@ with tab_history:
     with st.spinner("Mengambil data dari FRED..."):
         rate_df = data.fetch_fed_funds_rate_history(lookback_days=730)
 
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=rate_df["date"],
+            y=rate_df["rate"],
+            mode="lines",
+            line=dict(color=theme["accent"], width=2.5),
+            fill="tozeroy",
+            fillcolor=hex_to_rgba(theme["accent"], 0.10),
+            name="Effective Fed Funds Rate",
+        )
+    )
+    fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color=theme["text"], family="Inter"),
+        margin=dict(l=10, r=10, t=10, b=10),
+        height=380,
+        xaxis=dict(showgrid=False, title=None),
+        yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.08)", title="Rate (%)"),
+        hovermode="x unified",
+    )
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
-    #backtest
+    #BACKTEST KITA
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown("#### Backtest Akurasi Pasar (Fed Funds Futures)")
     st.caption(
@@ -455,32 +477,7 @@ with tab_history:
             else:
                 st.error("Gagal mengambil data historis untuk backtest.")
 
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=rate_df["date"],
-            y=rate_df["rate"],
-            mode="lines",
-            line=dict(color=theme["accent"], width=2.5),
-            fill="tozeroy",
-            fillcolor=hex_to_rgba(theme["accent"], 0.10),
-            name="Effective Fed Funds Rate",
-        )
-    )
-    fig.update_layout(
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=theme["text"], family="Inter"),
-        margin=dict(l=10, r=10, t=10, b=10),
-        height=380,
-        xaxis=dict(showgrid=False, title=None),
-        yaxis=dict(showgrid=True, gridcolor="rgba(255,255,255,0.08)", title="Rate (%)"),
-        hovermode="x unified",
-    )
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
-
-# --- TAB: Analisis Statement FOMC ----------------------------------------
+#TAB: Analisis Statement FOMC 
 with tab_ai:
     st.markdown("#### Analisis Sentimen Hawkish / Dovish")
     st.caption(
