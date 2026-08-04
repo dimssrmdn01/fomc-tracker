@@ -20,6 +20,7 @@ import datetime as dt
 from dataclasses import dataclass, field
 
 import requests
+import streamlit as st
 
 FINNHUB_NEWS_URL = "https://finnhub.io/api/v1/news"
 
@@ -109,7 +110,7 @@ def _fetch_one_category(finnhub_category: str, base_tag: str, api_key: str, limi
             continue
     return items
 
-
+@st.cache_data(ttl=600) 
 def fetch_market_news(api_key: str, limit_per_category: int = 25) -> tuple[list[NewsItem], FetchDiagnostics]:
     """
     Fetch recent market news from Finnhub across general, forex, and crypto
