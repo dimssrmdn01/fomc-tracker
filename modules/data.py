@@ -368,16 +368,16 @@ def estimate_move_probabilities(current_upper: float = CURRENT_TARGET_RANGE[1]) 
             "implied_rate": None,
         }
 
-# Fakta sejarah keputusan FOMC (Ground Truth)
+#data backtsest
 HISTORICAL_FOMC = [
-    {"date": "2023-07-26", "action": "hike", "prev_rate": 5.25},
-    {"date": "2023-09-20", "action": "hold", "prev_rate": 5.50},
-    {"date": "2023-11-01", "action": "hold", "prev_rate": 5.50},
-    {"date": "2023-12-13", "action": "hold", "prev_rate": 5.50},
-    {"date": "2024-01-31", "action": "hold", "prev_rate": 5.50},
-    {"date": "2024-03-20", "action": "hold", "prev_rate": 5.50},
-    {"date": "2024-05-01", "action": "hold", "prev_rate": 5.50},
-    {"date": "2024-06-12", "action": "hold", "prev_rate": 5.50},
+    {"date": "2023-07-26", "action": "hike", "prev_rate": 5.08},
+    {"date": "2023-09-20", "action": "hold", "prev_rate": 5.33},
+    {"date": "2023-11-01", "action": "hold", "prev_rate": 5.33},
+    {"date": "2023-12-13", "action": "hold", "prev_rate": 5.33},
+    {"date": "2024-01-31", "action": "hold", "prev_rate": 5.33},
+    {"date": "2024-03-20", "action": "hold", "prev_rate": 5.33},
+    {"date": "2024-05-01", "action": "hold", "prev_rate": 5.33},
+    {"date": "2024-06-12", "action": "hold", "prev_rate": 5.33},
 ]
 
 def run_fomc_backtest():
@@ -391,28 +391,28 @@ def run_fomc_backtest():
     for meeting in HISTORICAL_FOMC:
         target_date = dt.datetime.strptime(meeting["date"], "%Y-%m-%d").date()
         
-        # Mundur 1-3 hari untuk mencari hari kerja (harga penutupan pasar terakhir)
+        # Ambil harga ZQ=F H-1 (satu hari sebelum rapat)
         h_minus_1 = target_date - dt.timedelta(days=1)
         start_fetch = h_minus_1 - dt.timedelta(days=4)
         
         try:
-            # Tarik data dari Yahoo Finance
+            
             ticker = yf.Ticker("ZQ=F")
             df = ticker.history(start=start_fetch, end=target_date)
             
             if df.empty:
                 continue
+
                 
-            # Ambil harga penutupan terakhir sebelum rapat
             last_price = df['Close'].iloc[-1]
             implied_rate = 100 - last_price
             
-            # Logika sederhana prediksi pasar
+        
             rate_diff = implied_rate - meeting["prev_rate"]
             
-            if rate_diff > 0.125:
+            if rate_diff > 0.03:
                 market_prediction = "hike"
-            elif rate_diff < -0.125:
+            elif rate_diff < -0.03:
                 market_prediction = "cut"
             else:
                 market_prediction = "hold"
