@@ -118,8 +118,7 @@ with st.sidebar:
     
     # Menyiapkan opsi dari data.py
     available_options = list(data.AVAILABLE_ASSETS.keys())
-    default_options = ["Bitcoin", "Emas", "EUR/USD", "S&P 500"]
-    
+    default_options = ["BTC/USD", "Emas (Gold)", "EUR/USD", "S&P 500"]
     selected_assets = st.multiselect(
         "Pilih aset yang ingin dipantau di header:",
         options=available_options,
