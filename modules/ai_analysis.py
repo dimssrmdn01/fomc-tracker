@@ -46,11 +46,13 @@ def analyze_statement(statement_text: str, api_key: str, model: str = "llama-3.1
         completion = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                # Tambahan teks paksaan JSON di belakang system prompt
+                {"role": "system", "content": SYSTEM_PROMPT + "\n\nYou MUST respond entirely in valid JSON format."},
                 {"role": "user", "content": statement_text[:6000]},
             ],
             temperature=0.2,
             max_tokens=500,
+            response_format={"type": "json_object"} # 
         )
         raw = completion.choices[0].message.content.strip()
     except Exception as exc:
@@ -121,10 +123,7 @@ def analyze_news_sentiment(
 # Shared defensive JSON parsing for both scoring functions
 # ---------------------------------------------------------------------
 def _parse_score_response(raw: str) -> dict:
-    import re
-    import json
     
-    # 1. Pastikan string tidak kosong
     if not raw or not raw.strip():
         return {
             "score": 0,
