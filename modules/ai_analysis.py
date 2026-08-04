@@ -121,16 +121,52 @@ def analyze_news_sentiment(
 # Shared defensive JSON parsing for both scoring functions
 # ---------------------------------------------------------------------
 def _parse_score_response(raw: str) -> dict:
-    # Defensive parsing: strip markdown fences if the model adds them anyway.
-    raw = re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"Respons AI tidak dalam format JSON yang valid: {exc}") from exc
+    import re
+    import json
+    
+    # 1. Pastikan string tidak kosong
+    if not raw or not raw.strip():
+        return {
+            "score": 0,
+            "label": "NETRAL",
+            "summary": "API Groq mengembalikan respons kosong. Coba muat ulang.",
+            "key_phrases": ["Empty Response"]
+        }
+        
+    raw = raw.strip()
+    
+    # 
+    match = re.search(r'\{.*\}', raw, re.DOTALL)
+    if match:
+        raw_json = match.group(0)
+    else:
+        raw_json = raw # Fallback kalau regex gak nemu kurung kurawal
 
+    #
+    try:
+        data = json.loads(raw_json)
+    except json.JSONDecodeError as exc:
+        return {
+            "score": 0,
+            "label": "NETRAL",
+            "summary": f"Gagal membaca format AI. (Error: {str(exc)}). Silakan coba lagi.",
+            "key_phrases": ["JSON Error"]
+        }
+
+    # 
     required = {"score", "label", "summary", "key_phrases"}
     if not required.issubset(data.keys()):
-        raise ValueError("Respons AI tidak lengkap, coba ulangi analisis.")
+        return {
+            "score": 0,
+            "label": "NETRAL",
+            "summary": "Respons AI berhasil dibaca tapi ada data yang kurang lengkap.",
+            "key_phrases": ["Incomplete Data"]
+        }
 
-    data["score"] = max(-100, min(100, int(data["score"])))
+    # 
+    try:
+        data["score"] = max(-100, min(100, int(data["score"])))
+    except (ValueError, TypeError):
+        data["score"] = 0
+
     return data

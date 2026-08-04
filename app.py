@@ -187,8 +187,8 @@ st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 # -------------------------------------------------------------------------
 # TABS
 # -------------------------------------------------------------------------
-tab_news, tab_calendar, tab_wire, tab_history, tab_ai = st.tabs(
-    ["Berita Pasar", "FOMC & Bank Sentral", "Fed Wire", "Riwayat Suku Bunga", "Analisis Statement FOMC"]
+tab_news, tab_calendar, tab_wire, tab_history, tab_ai, tab_corr = st.tabs(
+    ["Berita Pasar", "FOMC & Bank Sentral", "Fed Wire", "Riwayat Suku Bunga", "Analisis Statement", "Korelasi Pasar"]
 )
 
 # --- TAB: Berita Pasar (general economic & financial news) --------------
@@ -592,3 +592,47 @@ st.caption(
     "Market Pulse adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, "
     "bukan nasihat investasi. Selalu verifikasi keputusan kebijakan resmi di federalreserve.gov."
 )
+
+#TAB: Korelasi Pasar 
+with tab_corr:
+    st.markdown("#### Matriks Korelasi Aset Makro (Heatmap)")
+    st.caption(
+        "Menganalisis korelasi pergerakan harian (daily returns) antar instrumen utama "
+        "selama 6 bulan terakhir. Nilai mendekati +1 berarti bergerak searah (korelasi positif kuat), "
+        "sedangkan mendekati -1 berlawanan arah (korelasi negatif)."
+    )
+    
+    with st.spinner("Menghitung matriks korelasi dari Yahoo Finance..."):
+        corr_matrix = data.fetch_correlation_data(lookback_days=180)
+        
+    if not corr_matrix.empty:
+        colorscale = [
+            [0.0, theme["down"]],     
+            [0.5, "rgba(0,0,0,0)"],   
+            [1.0, theme["info"]]      
+        ]
+        
+        fig_corr = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns,
+            y=corr_matrix.index,
+            colorscale=colorscale,
+            zmin=-1, zmax=1,
+            texttemplate="%{z:.2f}",
+            hoverinfo="x+y+z",
+            showscale=True
+        ))
+        
+        fig_corr.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=theme["text"], family="Inter"),
+            margin=dict(l=10, r=10, t=30, b=10),
+            height=450,
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, autorange="reversed") 
+        )
+        
+        st.plotly_chart(fig_corr, use_container_width=True)
+    else:
+        st.error("Gagal mengambil data untuk matriks korelasi.")

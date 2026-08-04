@@ -435,3 +435,40 @@ def run_fomc_backtest():
             
     accuracy = (correct_predictions / len(results)) * 100 if results else 0
     return pd.DataFrame(results), accuracy
+
+def fetch_correlation_data(lookback_days=180):
+    """
+    Menarik data historis dari yfinance, menghitung daily return, 
+    dan menghasilkan matriks korelasi antar aset makro.
+    """
+    tickers = {
+        "S&P 500": "^GSPC",
+        "Bitcoin": "BTC-USD",
+        "Emas": "GC=F",
+        "DXY (USD)": "DX-Y.NYB",
+        "Minyak (WTI)": "CL=F"
+    }
+    
+    end_date = dt.date.today()
+    start_date = end_date - dt.timedelta(days=lookback_days)
+    
+    df_list = []
+    for name, ticker in tickers.items():
+        try:
+            t = yf.Ticker(ticker)
+            hist = t.history(start=start_date, end=end_date)
+            if not hist.empty:
+                # Hitung persentase perubahan harian (daily return)
+                ret = hist['Close'].pct_change().rename(name)
+                df_list.append(ret)
+        except Exception:
+            continue
+            
+    if df_list:
+        # Gabungkan semua data return
+        returns_df = pd.concat(df_list, axis=1).dropna()
+        # Hitung matriks korelasi Pearson
+        corr_matrix = returns_df.corr()
+        return corr_matrix
+        
+    return pd.DataFrame()
