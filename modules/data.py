@@ -15,6 +15,7 @@ from dataclasses import dataclass
 import pandas as pd
 import requests
 import yfinance as yf
+import streamlit as st
 
 FRED_SERIES_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
 
@@ -72,7 +73,7 @@ def format_price(price: float, category: str) -> str:
         return f"{price:,.0f}"
     return f"{price:,.2f}"
 
-
+@st.cache_data(ttl=300)
 def fetch_market_snapshot() -> list[dict]:
     """
     Pull a quick multi-asset snapshot (crypto, forex, stock indices) via
@@ -210,7 +211,7 @@ def get_next_meeting(as_of: dt.date | None = None) -> MeetingInfo | None:
             return m
     return None
 
-
+@st.cache_data(ttl=3600)
 def fetch_fed_funds_rate_history(lookback_days: int = 730) -> pd.DataFrame:
     """
     Pull the effective Federal Funds Rate (FEDFUNDS, daily EFFR series DFF)
@@ -436,6 +437,7 @@ def run_fomc_backtest():
     accuracy = (correct_predictions / len(results)) * 100 if results else 0
     return pd.DataFrame(results), accuracy
 
+@st.cache_data(ttl=3600)
 def fetch_correlation_data(lookback_days=180):
 
     tickers = {
