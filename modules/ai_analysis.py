@@ -169,3 +169,49 @@ def _parse_score_response(raw: str) -> dict:
         data["score"] = 0
 
     return data
+
+def generate_market_recap(snapshot_data: list, headlines: list, api_key: str, lang: str = 'ID', model: str = "llama-3.1-8b-instant") -> str:
+    """
+    Mengirim data harga terkini dan headline berita ke Groq untuk dibuatkan 
+    satu paragraf narasi ringkasan pasar.
+    """
+    from groq import Groq
+    
+    if not api_key:
+        raise ValueError("Groq API key belum diisi.")
+        
+    #data harga menjadi teks
+    price_text = ", ".join([f"{a['label']}: {a['price']} ({a['change_pct']}%)" for a in snapshot_data])
+    
+    #berita menjadi teks 
+    news_text = "\n".join(headlines[:5])
+    
+    language_instruction = "Indonesian" if lang == 'ID' else "English"
+    
+    prompt = f"""
+    You are a professional financial market analyst. 
+    Write a ONE paragraph market recap (max 4-5 sentences) summarizing today's market action based on the data below.
+    Focus on facts, which assets are up/down, and relate it briefly to the news if relevant.
+    Do NOT give financial advice. Respond entirely in {language_instruction}.
+    
+    CURRENT PRICES:
+    {price_text}
+    
+    TOP HEADLINES:
+    {news_text}
+    """
+
+    client = Groq(api_key=api_key)
+    try:
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a concise financial analyst."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.3,
+            max_tokens=250,
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as exc:
+        raise ValueError(f"Gagal menghubungi Groq API: {exc}") from exc
