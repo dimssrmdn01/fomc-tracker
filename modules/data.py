@@ -48,9 +48,9 @@ FALLBACK_RATE_HISTORY = pd.DataFrame(
     }
 )
 
-CURRENT_TARGET_RANGE = (3.50, 3.75)  # (lower, upper) bound, %, as of Jul 2026
+CURRENT_TARGET_RANGE = (3.50, 3.75)  
 
-# Multi-asset ticker strip: crypto, forex majors 
+#Multi-asset ticker strip: crypto, forex majors 
 AVAILABLE_ASSETS = {
     "BTC/USD": {"symbol": "BTC-USD", "category": "crypto"},
     "ETH/USD": {"symbol": "ETH-USD", "category": "crypto"},
@@ -59,7 +59,9 @@ AVAILABLE_ASSETS = {
     "USD/JPY": {"symbol": "USDJPY=X", "category": "forex"},
     "USD/IDR": {"symbol": "USDIDR=X", "category": "forex"},
     "S&P 500": {"symbol": "^GSPC", "category": "stock"},
-    "Nasdaq": {"symbol": "^IXIC", "category": "stock"},
+    "Nasdaq Composite": {"symbol": "^IXIC", "category": "stock"}, 
+    "Nasdaq 100": {"symbol": "NDX", "category": "stock"}, 
+    "Dow Jones": {"symbol": "^DJI", "category": "stock"}, 
     "Emas (Gold)": {"symbol": "GC=F", "category": "commodity"},
     "Minyak (WTI)": {"symbol": "CL=F", "category": "commodity"}
 }
