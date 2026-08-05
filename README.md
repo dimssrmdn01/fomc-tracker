@@ -18,11 +18,11 @@
 
 ## About
 
-**Market Pulse** tracks crypto, forex, and stock markets alongside US Federal Reserve policy in one dashboard — a live multi-asset ticker, an AI-scored news feed, the official Fed press wire, FOMC/CPI/NFP calendars, historical rate data, a real backtest of market-implied predictions, and a cross-asset correlation matrix.
+**Market Pulse** tracks crypto, forex, and stock markets alongside US Federal Reserve policy in one dashboard  a live multi-asset ticker, an AI-scored news feed, the official Fed press wire, FOMC/CPI/NFP calendars, historical rate data, a real backtest of market-implied predictions, and a cross-asset correlation matrix.
 
-Every number on the AI-generated side is labeled for what it actually is. The Fed Wire's Hawkish/Dovish tags are a plain keyword count on release titles, not an NLP model — the real AI scoring lives in the Statement Analysis tab, which sends actual statement text to an LLM. The backtest compares the market's own implied prediction (from historical Fed Funds futures pricing) against real FOMC outcomes, so the accuracy shown is calculated, not asserted.
+Every number on the AI-generated side is labeled for what it actually is. The Fed Wire's Hawkish/Dovish tags are a plain keyword count on release titles, not an NLP model the real AI scoring lives in the Statement Analysis tab, which sends actual statement text to an LLM. The backtest compares the market's own implied prediction (from historical Fed Funds futures pricing) against real FOMC outcomes, so the accuracy shown is calculated, not asserted.
 
-The design leans into the vocabulary of the subject itself — currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — instead of a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber), and the entire UI switches between Indonesian and English with one click.
+The design leans into the vocabulary of the subject itself currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — instead of a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber), and the entire UI switches between Indonesian and English with one click.
 
 ## Features
 
@@ -89,7 +89,7 @@ Then run it:
 streamlit run app.py
 ```
 
-The ticker, calendars, Fed Wire, rate history, and backtest all work with zero API keys — only the news feed and AI-powered tabs need them.
+The ticker, calendars, Fed Wire, rate history, and backtest all work with zero API keys only the news feed and AI-powered tabs need them.
 
 ## Deployment
 
