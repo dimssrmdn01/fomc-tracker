@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fraunces&weight=600&size=30&pause=1000&color=B9975B&center=true&vCenter=true&width=650&lines=Market+Pulse;Crypto+%2C+Forex+%26+Stocks+Dashboard;FOMC+Hawkish+%2F+Dovish+AI+Analysis;Real-Time+Multi-Asset+Snapshot" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fraunces&weight=600&size=28&pause=1000&color=B9975B&center=true&vCenter=true&width=650&lines=Market+Pulse;Crypto+%2C+Forex+%26+Stocks+Dashboard;Real-Time+Data+%2B+AI+Sentiment;Bilingual+%C2%B7+ID+%2F+EN" alt="Typing SVG" />
 </div>
 
 <div align="center">
@@ -8,59 +8,60 @@
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/▶_Live_Demo-B9975B?style=for-the-badge&logoColor=white)](https://dimss-market-pulse.streamlit.app/)
 ![Python](https://img.shields.io/badge/Python-3.9+-1c100b?style=for-the-badge&logo=python&logoColor=B9975B)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1c100b?style=for-the-badge&logo=streamlit&logoColor=FF4B4B)
 ![Groq](https://img.shields.io/badge/Groq-1c100b?style=for-the-badge&logo=groq&logoColor=F59E0B)
-![Finnhub](https://img.shields.io/badge/Finnhub-1c100b?style=for-the-badge&logo=data:image/svg+xml;base64,&logoColor=00C48C)
 ![Plotly](https://img.shields.io/badge/Plotly-1c100b?style=for-the-badge&logo=plotly&logoColor=3F4F75)
 
 </div>
 
-## Overview
+## About
 
-**Market Pulse** is a dashboard for following crypto, forex, and stock markets alongside US Federal Reserve monetary policy: a live multi-asset price ticker, an economic/financial news feed with AI sentiment scoring, the official Fed press-release wire, the FOMC meeting calendar plus CPI and NFP release schedules, historical Fed Funds Rate, market-implied move probabilities, and an AI-powered hawkish/dovish score for any FOMC statement text.
+**Market Pulse** tracks crypto, forex, and stock markets alongside US Federal Reserve policy in one dashboard — a live multi-asset ticker, an AI-scored news feed, the official Fed press wire, FOMC/CPI/NFP calendars, historical rate data, a real backtest of market-implied predictions, and a cross-asset correlation matrix.
 
-The visual design is deliberately grounded in the vocabulary of the subject itself — currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — rather than a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber).
+Every number on the AI-generated side is labeled for what it actually is. The Fed Wire's Hawkish/Dovish tags are a plain keyword count on release titles, not an NLP model — the real AI scoring lives in the Statement Analysis tab, which sends actual statement text to an LLM. The backtest compares the market's own implied prediction (from historical Fed Funds futures pricing) against real FOMC outcomes, so the accuracy shown is calculated, not asserted.
+
+The design leans into the vocabulary of the subject itself — currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — instead of a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber), and the entire UI switches between Indonesian and English with one click.
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **Multi-Asset Ticker** | Live BTC, ETH, SOL, EUR/USD, USD/JPY, USD/IDR, S&P 500, and Nasdaq prices with % change, pulled via Yahoo Finance |
-| **Berita Pasar (News Feed)** | Economic & financial news from Finnhub across general, forex, and crypto categories, auto-tagged by topic (Bank Sentral, Inflasi, Pasar Saham, Kripto, Forex, Komoditas) |
-| **Market Sentiment (AI)** | AI-scored Bearish ↔ Bullish read on the overall mood of the current news feed |
-| **Fed Wire** | Official Federal Reserve press-release RSS feed, with a lightweight keyword-based Hawkish/Dovish/Neutral lean (clearly labeled as a rough heuristic, not an NLP model) |
-| **FOMC Meeting Calendar** | Full 2026 FOMC schedule with a live countdown to the next decision and SEP/dot-plot markers |
-| **CPI & NFP Calendars** | Official U.S. Bureau of Labor Statistics release schedules for CPI and the Employment Situation (NFP) report |
-| **Rate History Chart** | Effective Federal Funds Rate pulled live from FRED, with graceful fallback if the network call fails |
-| **Move Probabilities** | Cut / Hold / Hike odds estimated from 30-Day Fed Funds futures (CME ZQ), in the spirit of the CME FedWatch methodology |
-| **FOMC Statement Analysis (AI)** | Paste any FOMC statement or speech excerpt; Llama-3.1 (via Groq) scores it -100 to +100 on a hawkish-dovish scale and explains why |
-| **Hawk-Dove / Bear-Bull Gauge** | A custom SVG instrument gauge, reused for both the FOMC statement score and the general market sentiment score |
-| **Theme Selector** | Three color palettes (Ledger Hijau, Midnight Slate, Terminal Amber), applied consistently across charts, the gauge, and all UI elements |
+**Market Overview**
+Live prices for a customizable watchlist (crypto, forex, indices — pick your own set in the sidebar), an AI-generated market recap that narrates *what already happened* today from price action and headlines (not a prediction), and a Finnhub-powered news feed auto-tagged by topic with an AI Bearish↔Bullish sentiment score.
+
+**Federal Reserve & Macro Calendar**
+The full FOMC meeting schedule with SEP/dot-plot markers, official BLS release dates for CPI and NFP, and a live wire of Fed press releases straight from federalreserve.gov.
+
+**Quantitative Tools**
+Historical Effective Fed Funds Rate from FRED, a backtest that scores how often Fed Funds futures correctly called the actual FOMC decision, and a 6-month rolling correlation heatmap across major crypto/forex/equity/rate instruments.
+
+**AI Statement Analysis**
+Paste any FOMC statement or Fed speech excerpt and get a -100 to +100 hawkish–dovish score with a plain-language explanation, powered by Llama-3.1 via Groq.
 
 ## Tech Stack
 
-- **Frontend:** Streamlit, custom CSS (Fraunces + Inter + IBM Plex Mono)
-- **Market Data:** Yahoo Finance (crypto/forex/stock prices, Fed Funds futures), FRED (Federal Reserve Economic Data)
-- **News:** Finnhub API (general/forex/crypto market news)
-- **Official Sources:** federalreserve.gov (press releases, RSS wire), U.S. Bureau of Labor Statistics (CPI/NFP calendars)
-- **AI:** Groq API, Llama-3.1-8b-instant
-- **Charts:** Plotly
+| Layer | Tools |
+|---|---|
+| Frontend | Streamlit, custom CSS (Fraunces + Inter + IBM Plex Mono) |
+| Market Data | Yahoo Finance (prices, futures), FRED (Fed Funds Rate) |
+| News | Finnhub API |
+| Official Sources | federalreserve.gov (press releases, RSS), U.S. Bureau of Labor Statistics (CPI/NFP) |
+| AI | Groq API — Llama-3.1-8b-instant |
+| Charts | Plotly |
 
 ## Project Structure
 
 ```
-fomc-tracker/
-├── app.py                  # Main Streamlit entry point
+market-pulse/
+├── app.py                    Main Streamlit entry point
 ├── modules/
-│   ├── data.py              # Market snapshot, FOMC/CPI/NFP calendars, FRED fetch, probability model
-│   ├── news.py               # Finnhub news fetch + topic tagging
-│   ├── fed_wire.py           # Official Fed RSS feed + keyword lean heuristic
-│   ├── ai_analysis.py        # Groq-powered hawkish/dovish and bearish/bullish scoring
-│   ├── gauge.py              # Theme-aware SVG sentiment gauge renderer
-│   └── styling.py            # Theme palettes + injected CSS
-├── .streamlit/
-│   └── config.toml           # Streamlit theme config
+│   ├── data.py                Market snapshot, calendars, FRED, backtest, correlation
+│   ├── news.py                 Finnhub news fetch + topic tagging
+│   ├── fed_wire.py             Official Fed RSS feed + keyword lean heuristic
+│   ├── ai_analysis.py          Groq-powered scoring (statement, news, recap)
+│   ├── gauge.py                Theme-aware SVG sentiment gauge
+│   └── styling.py              Theme palettes + injected CSS
+├── .streamlit/config.toml     Streamlit theme config
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -68,58 +69,40 @@ fomc-tracker/
 
 ## Getting Started
 
-### Prerequisites
-- Python 3.9+
-- A free Groq API key ([console.groq.com/keys](https://console.groq.com/keys)) — only needed for the AI Analysis tabs
-- A free Finnhub API key ([finnhub.io/register](https://finnhub.io/register)) — only needed for the Berita Pasar (news) tab
+**Prerequisites:** Python 3.9+, a free [Groq API key](https://console.groq.com/keys) for AI features, a free [Finnhub API key](https://finnhub.io/register) for the news feed.
 
-### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/fomc-tracker.git
-cd fomc-tracker
-```
-
-### 2. Create a Virtual Environment
-```bash
-python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-```
-
-### 3. Install Dependencies
-```bash
+git clone https://github.com/dimssrmdn01/market-pulse.git
+cd market-pulse
+python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configure API Keys (optional but recommended)
-Create a `.env` file in the project root:
+Add your keys to a `.env` file:
 ```
 GROQ_API_KEY=gsk_...
 FINNHUB_API_KEY=...
 ```
-The app also reads these from Streamlit secrets on Streamlit Cloud — see Deployment below. Without them, the app still runs; the sidebar will prompt for manual entry when a key-dependent tab is opened.
 
-### 5. Run Locally
+Then run it:
 ```bash
 streamlit run app.py
 ```
-The app opens at `http://localhost:8501`. The multi-asset ticker, FOMC calendar, CPI/NFP schedules, Fed Wire, and rate history work with no keys at all.
 
-## Deployment (Streamlit Community Cloud)
+The ticker, calendars, Fed Wire, rate history, and backtest all work with zero API keys — only the news feed and AI-powered tabs need them.
 
-1. Push this repo to your own GitHub account.
-2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
-3. Click **New app**, select this repository and `app.py` as the entry point.
-4. Under **Advanced settings → Secrets**, add:
-   ```toml
-   GROQ_API_KEY = "gsk_..."
-   FINNHUB_API_KEY = "..."
-   ```
-5. Click **Deploy**.
+## Deployment
+
+Push to your own GitHub, then deploy free on [Streamlit Community Cloud](https://share.streamlit.io): select this repo and `app.py`, and under **Advanced settings → Secrets** add the same two keys in TOML format.
 
 ## Disclaimer
 
-This is an educational/portfolio project. Market data, rate probabilities, and AI-generated sentiment scores (including the Fed Wire's keyword-based lean) are indicative estimates only, not investment advice. Always verify official policy decisions and economic releases at [federalreserve.gov](https://www.federalreserve.gov) and [bls.gov](https://www.bls.gov).
+Educational and portfolio project. Market data, backtest results, and AI-generated scores are indicative estimates, not investment advice. Always verify official policy decisions and economic releases at [federalreserve.gov](https://www.federalreserve.gov) and [bls.gov](https://www.bls.gov).
 
 ## Author
 
-Built by **Dimas Arya Ramadhan** — an upgraded take on an FOMC tracking concept, expanded into a broader crypto/forex/stocks dashboard with live multi-source news, an official Fed RSS wire, and AI-powered sentiment analysis.
+Built by **Dimas Arya Ramadhan** — started as a single-purpose FOMC tracker, grown into a bilingual, multi-asset dashboard with live news, an official Fed wire, a real backtest, and cross-asset correlation analysis.
+
+<div align="center">
+  <sub>⭐ If this project is useful to you, consider starring the repo.</sub>
+</div>
