@@ -19,6 +19,16 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+if 'lang' not in st.session_state:
+    st.session_state['lang'] = 'ID' 
+
+def toggle_lang():
+    if st.session_state['lang'] == 'ID':
+        st.session_state['lang'] = 'EN'
+    else:
+        st.session_state['lang'] = 'ID'
+
+lang = st.session_state['lang']
 
 def get_saved_key(name: str) -> str:
     """
@@ -86,6 +96,9 @@ st.html("""
 """)
 
 with st.sidebar:
+    # Tombol Ganti Bahasa
+    button_label = "🌐 Switch to English" if lang == 'ID' else "🌐 Ganti ke Indonesia"
+    st.button(button_label, on_click=toggle_lang, use_container_width=True)
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
     st.markdown(
         "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
@@ -110,13 +123,18 @@ with st.sidebar:
         st.caption("Dapatkan gratis di [console.groq.com](https://console.groq.com/keys) — untuk analisis sentimen AI.")
 
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+    if lang == 'ID':
+       teks_judul = "Watchlist Personal"
+    else:
+       teks_judul = "Personal Watchlist"
+
     st.markdown(
-        "<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
-        "letter-spacing:0.08em; color:#B9975B;'>Watchlist Personal</p>",
-        unsafe_allow_html=True,
+       f"<p style='font-family:IBM Plex Mono,monospace; font-size:0.72rem; text-transform:uppercase; "
+       f"letter-spacing:0.08em; color:#B9975B;'>{teks_judul}</p>",
+       unsafe_allow_html=True,
     )
+
     
-    # Menyiapkan opsi dari data.py
     available_options = list(data.AVAILABLE_ASSETS.keys())
     default_options = ["BTC/USD", "Emas (Gold)", "EUR/USD", "S&P 500"]
     selected_assets = st.multiselect(
@@ -133,7 +151,10 @@ today = dt.date.today()
 next_meeting = data.get_next_meeting(today)
 lower, upper = data.CURRENT_TARGET_RANGE
 
-st.markdown("##### Ringkasan Pasar &middot; Crypto, Forex & Saham")
+if lang == 'ID':
+    st.markdown("### Ringkasan Pasar · Crypto, Forex & Saham")
+else:
+    st.markdown("### Market Summary · Crypto, Forex & Equities")
 with st.spinner("Mengambil harga terkini..."):
     snapshot = data.fetch_market_snapshot(selected_assets)
 
