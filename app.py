@@ -207,7 +207,7 @@ tab_names = [
     "Korelasi Pasar" if lang == 'ID' else "Market Correlation"
 ]
 #MARKET RECAP AI BUTTON 
-with st.expander(">_ Generate AI Market Recap" if lang == 'EN' else ">_ Buat Ringkasan Pasar AI"):
+with st.expander("Analisis Pasar Otomatis (AI)" if lang == 'ID' else "Automated Market Analysis (AI)"):
     st.caption("Buat ringkasan naratif otomatis berdasarkan pergerakan harga dan berita terbaru." if lang == 'ID' else "Generate an automated narrative summary based on latest price actions and news.")
     
     if st.button("Generate Briefing", type="primary", use_container_width=True):
