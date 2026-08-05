@@ -206,6 +206,27 @@ tab_names = [
     "Analisis Statement" if lang == 'ID' else "Statement Analysis",
     "Korelasi Pasar" if lang == 'ID' else "Market Correlation"
 ]
+#MARKET RECAP AI BUTTON 
+with st.expander("✨ AI Market Briefing" if lang == 'EN' else "✨ Briefing Pasar AI"):
+    st.caption("Buat ringkasan naratif otomatis berdasarkan pergerakan harga dan berita terbaru." if lang == 'ID' else "Generate an automated narrative summary based on latest price actions and news.")
+    
+    if st.button("Generate Briefing", type="primary", use_container_width=True):
+        if not groq_api_key or not finnhub_api_key:
+            st.error("API Key Groq & Finnhub harus diisi di sidebar." if lang == 'ID' else "Groq & Finnhub API Keys must be provided in the sidebar.")
+        else:
+            try:
+                with st.spinner("AI sedang merangkum pasar..." if lang == 'ID' else "AI is summarizing the market..."):
+
+                    news_items, _ = news.fetch_market_news(finnhub_api_key)
+                    headlines = [n.headline for n in news_items] if news_items else ["Tidak ada berita utama."]
+                    recap_text = ai_analysis.generate_market_recap(snapshot, headlines, groq_api_key, lang)
+                    
+                    st.success(recap_text)
+            except Exception as e:
+                st.error(f"Error: {e}")
+                
+st.markdown('<br>', unsafe_allow_html=True)
+# -------------------------------------------------------------------------
 tab_news, tab_calendar, tab_wire, tab_history, tab_ai, tab_corr = st.tabs(tab_names)
 
 # --- TAB 1: Berita Pasar ---
