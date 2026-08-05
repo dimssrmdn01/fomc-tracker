@@ -199,10 +199,10 @@ st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 # TABS (regrouped: 4 tabs by user intent instead of 6 by data source)
 # -------------------------------------------------------------------------
 tab_names = [
-    "🌐 Ringkasan Pasar" if lang == 'ID' else "🌐 Market Overview",
-    "🏛️ Bank Sentral" if lang == 'ID' else "🏛️ Central Bank",
-    "📊 Analisis Kuantitatif" if lang == 'ID' else "📊 Quantitative Analysis",
-    "🤖 Analisis Statement" if lang == 'ID' else "🤖 Statement Analysis",
+    "Ringkasan Pasar" if lang == 'ID' else "Market Overview",
+    "Bank Sentral" if lang == 'ID' else "Central Bank",
+    "Analisis Kuantitatif" if lang == 'ID' else "Quantitative Analysis",
+    "Analisis Statement" if lang == 'ID' else "Statement Analysis",
 ]
 tab_overview, tab_central, tab_quant, tab_ai = st.tabs(tab_names)
 
