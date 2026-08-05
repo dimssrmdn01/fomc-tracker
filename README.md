@@ -22,12 +22,12 @@
 
 Every number on the AI-generated side is labeled for what it actually is. The Fed Wire's Hawkish/Dovish tags are a plain keyword count on release titles, not an NLP model the real AI scoring lives in the Statement Analysis tab, which sends actual statement text to an LLM. The backtest compares the market's own implied prediction (from historical Fed Funds futures pricing) against real FOMC outcomes, so the accuracy shown is calculated, not asserted.
 
-The design leans into the vocabulary of the subject itself currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge — instead of a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber), and the entire UI switches between Indonesian and English with one click.
+The design leans into the vocabulary of the subject itself currency green, treasury parchment, gold-seal accents, and a hand-drawn hawk/dove instrument gauge instead of a generic dashboard template. Three color themes are available (Ledger Hijau, Midnight Slate, Terminal Amber), and the entire UI switches between Indonesian and English with one click.
 
 ## Features
 
 **Market Overview**
-Live prices for a customizable watchlist (crypto, forex, indices — pick your own set in the sidebar), an AI-generated market recap that narrates *what already happened* today from price action and headlines (not a prediction), and a Finnhub-powered news feed auto-tagged by topic with an AI Bearish↔Bullish sentiment score.
+Live prices for a customizable watchlist (crypto, forex, indices pick your own set in the sidebar), an AI-generated market recap that narrates *what already happened* today from price action and headlines (not a prediction), and a Finnhub-powered news feed auto-tagged by topic with an AI Bearish↔Bullish sentiment score.
 
 **Federal Reserve & Macro Calendar**
 The full FOMC meeting schedule with SEP/dot-plot markers, official BLS release dates for CPI and NFP, and a live wire of Fed press releases straight from federalreserve.gov.
