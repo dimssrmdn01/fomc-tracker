@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 if 'lang' not in st.session_state:
-    st.session_state['lang'] = 'ID' 
+    st.session_state['lang'] = 'ID'
 
 def toggle_lang():
     if st.session_state['lang'] == 'ID':
@@ -84,7 +84,7 @@ with st.sidebar:
         "letter-spacing:0.08em; color:#B9975B;'>API Keys</p>",
         unsafe_allow_html=True,
     )
-    
+
     saved_finnhub_key = get_saved_key("FINNHUB_API_KEY")
     saved_groq_key = get_saved_key("GROQ_API_KEY")
 
@@ -93,7 +93,7 @@ with st.sidebar:
         st.caption("✓ Finnhub API Key dimuat otomatis..." if lang == 'ID' else "✓ Finnhub API Key loaded automatically...")
     else:
         finnhub_api_key = st.text_input("Finnhub API Key", type="password", placeholder="c...")
-        st.caption("Dapatkan gratis di [finnhub.io/register](https://finnhub.io/register) — untuk tab Berita Pasar." if lang == 'ID' else "Get it for free at [finnhub.io/register](https://finnhub.io/register) — for the Market News tab.")
+        st.caption("Dapatkan gratis di [finnhub.io/register](https://finnhub.io/register) — untuk tab Ringkasan Pasar." if lang == 'ID' else "Get it for free at [finnhub.io/register](https://finnhub.io/register) — for the Market Overview tab.")
 
     if saved_groq_key:
         groq_api_key = saved_groq_key
@@ -129,7 +129,7 @@ if lang == 'ID':
     st.markdown("### Ringkasan Pasar · Crypto, Forex & Saham")
 else:
     st.markdown("### Market Summary · Crypto, Forex & Equities")
-    
+
 with st.spinner("Mengambil harga terkini..." if lang == 'ID' else "Fetching live prices..."):
     snapshot = data.fetch_market_snapshot(selected_assets)
 
@@ -154,11 +154,11 @@ with hero_col1:
         days_label = f"{next_meeting.days_away} hari lagi" if lang == 'ID' else f"{next_meeting.days_away} days away"
     else:
         days_label = "Sedang berlangsung / baru saja selesai" if lang == 'ID' else "In progress / recently concluded"
-        
+
     eyebrow = "Federal Reserve &middot; Kebijakan Moneter" if lang == 'ID' else "Federal Reserve &middot; Monetary Policy"
     meeting_lbl = "Rapat FOMC berikutnya:" if lang == 'ID' else "Next FOMC meeting:"
     sep_lbl = " &middot; disertai Summary of Economic Projections (dot plot)" if lang == 'ID' else " &middot; includes Summary of Economic Projections (dot plot)"
-    
+
     st.markdown(
         f"""
 <div class="ledger-hero">
@@ -196,45 +196,42 @@ with hero_col2:
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 
 # -------------------------------------------------------------------------
-# TABS
+# TABS (regrouped: 4 tabs by user intent instead of 6 by data source)
 # -------------------------------------------------------------------------
 tab_names = [
-    "Berita Pasar" if lang == 'ID' else "Market News",
-    "FOMC & Bank Sentral" if lang == 'ID' else "FOMC & Central Banks",
-    "Fed Wire", 
-    "Riwayat Suku Bunga" if lang == 'ID' else "Rate History",
-    "Analisis Statement" if lang == 'ID' else "Statement Analysis",
-    "Korelasi Pasar" if lang == 'ID' else "Market Correlation"
+    "🌐 Ringkasan Pasar" if lang == 'ID' else "🌐 Market Overview",
+    "🏛️ Bank Sentral" if lang == 'ID' else "🏛️ Central Bank",
+    "📊 Analisis Kuantitatif" if lang == 'ID' else "📊 Quantitative Analysis",
+    "🤖 Analisis Statement" if lang == 'ID' else "🤖 Statement Analysis",
 ]
-#MARKET RECAP AI BUTTON 
-with st.expander("Analisis Pasar Otomatis (AI)" if lang == 'ID' else "Automated Market Analysis (AI)"):
-    st.caption("Buat ringkasan naratif otomatis berdasarkan pergerakan harga dan berita terbaru." if lang == 'ID' else "Generate an automated narrative summary based on latest price actions and news.")
-    
-    if st.button("Generate Briefing", type="primary", use_container_width=True):
-        if not groq_api_key or not finnhub_api_key:
-            st.error("API Key Groq & Finnhub harus diisi di sidebar." if lang == 'ID' else "Groq & Finnhub API Keys must be provided in the sidebar.")
-        else:
-            try:
-                with st.spinner("AI sedang merangkum pasar..." if lang == 'ID' else "AI is summarizing the market..."):
+tab_overview, tab_central, tab_quant, tab_ai = st.tabs(tab_names)
 
-                    news_items, _ = news.fetch_market_news(finnhub_api_key)
-                    headlines = [n.headline for n in news_items] if news_items else ["Tidak ada berita utama."]
-                    recap_text = ai_analysis.generate_market_recap(snapshot, headlines, groq_api_key, lang)
-                    
-                    st.success(recap_text)
-            except Exception as e:
-                st.error(f"Error: {e}")
-                
-st.markdown('<br>', unsafe_allow_html=True)
-# -------------------------------------------------------------------------
-tab_news, tab_calendar, tab_wire, tab_history, tab_ai, tab_corr = st.tabs(tab_names)
+# =========================================================================
+# TAB 1: RINGKASAN PASAR — AI recap + news feed + news sentiment
+# =========================================================================
+with tab_overview:
+    with st.expander("Analisis Pasar Otomatis (AI)" if lang == 'ID' else "Automated Market Analysis (AI)"):
+        st.caption("Buat ringkasan naratif otomatis berdasarkan pergerakan harga dan berita terbaru." if lang == 'ID' else "Generate an automated narrative summary based on latest price actions and news.")
 
-# --- TAB 1: Berita Pasar ---
-with tab_news:
+        if st.button("Generate Briefing", type="primary", use_container_width=True):
+            if not groq_api_key or not finnhub_api_key:
+                st.error("API Key Groq & Finnhub harus diisi di sidebar." if lang == 'ID' else "Groq & Finnhub API Keys must be provided in the sidebar.")
+            else:
+                try:
+                    with st.spinner("AI sedang merangkum pasar..." if lang == 'ID' else "AI is summarizing the market..."):
+                        news_items, _ = news.fetch_market_news(finnhub_api_key)
+                        headlines = [n.headline for n in news_items] if news_items else ["Tidak ada berita utama."]
+                        recap_text = ai_analysis.generate_market_recap(snapshot, headlines, groq_api_key, lang)
+                        st.success(recap_text)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+
     st.markdown("#### Berita Ekonomi & Pasar Finansial" if lang == 'ID' else "#### Economic & Financial Market News")
     st.caption(
-        "Feed berita terkini dari Finnhub, otomatis ditandai per topik. Klik 'Analisis Sentimen Pasar' untuk penilaian AI atas mood pasar secara keseluruhan." 
-        if lang == 'ID' else 
+        "Feed berita terkini dari Finnhub, otomatis ditandai per topik. Klik 'Analisis Sentimen Pasar' untuk penilaian AI atas mood pasar secara keseluruhan."
+        if lang == 'ID' else
         "Latest news feed from Finnhub, automatically tagged by topic. Click 'Analyze Market Sentiment' for an AI assessment of the overall market mood."
     )
 
@@ -280,7 +277,7 @@ with tab_news:
         if items:
             with col_filter:
                 tag_translations = {
-                    "Semua": "All", "Bank Sentral": "Central Banks", "Data Makro (CPI/PPI)": "Macro Data (CPI/PPI)", 
+                    "Semua": "All", "Bank Sentral": "Central Banks", "Data Makro (CPI/PPI)": "Macro Data (CPI/PPI)",
                     "Pasar Saham": "Equities", "Kripto": "Crypto", "Forex": "Forex", "Komoditas": "Commodities"
                 }
                 selected_tag = st.radio(
@@ -354,8 +351,10 @@ with tab_news:
         elif items is not None:
             st.info("Belum ada berita untuk ditampilkan." if lang == 'ID' else "No news to display.")
 
-# --- TAB 2: Calendar ---
-with tab_calendar:
+# =========================================================================
+# TAB 2: BANK SENTRAL — FOMC calendar + CPI/NFP + Fed Wire, one place
+# =========================================================================
+with tab_central:
     st.markdown("#### Jadwal Rapat FOMC 2026" if lang == 'ID' else "#### 2026 FOMC Meeting Schedule")
     schedule = data.get_meeting_schedule(today)
     for m in schedule:
@@ -415,12 +414,12 @@ with tab_calendar:
             )
         st.caption("Sumber: U.S. Bureau of Labor Statistics." if lang == 'ID' else "Source: U.S. Bureau of Labor Statistics.")
 
-# --- TAB 3: Fed Wire ---
-with tab_wire:
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+
     st.markdown("#### Fed Wire &middot; Rilis Resmi federalreserve.gov" if lang == 'ID' else "#### Fed Wire &middot; Official Releases federalreserve.gov")
     st.caption(
-        "Feed RSS resmi rilis pers Federal Reserve. Tag Hawkish/Dovish di sini murni hitungan kata kunci sederhana pada judul — bukan model NLP atau analisis mendalam. Untuk penilaian AI yang sesungguhnya atas teks statement, pakai tab 'Analisis Statement FOMC'." 
-        if lang == 'ID' else 
+        "Feed RSS resmi rilis pers Federal Reserve. Tag Hawkish/Dovish di sini murni hitungan kata kunci sederhana pada judul — bukan model NLP atau analisis mendalam. Untuk penilaian AI yang sesungguhnya atas teks statement, pakai tab 'Analisis Statement'."
+        if lang == 'ID' else
         "Official RSS feed for Federal Reserve press releases. Hawkish/Dovish tags here are purely basic keyword counts on titles — not an NLP model or deep analysis. For true AI assessment, use the 'Statement Analysis' tab."
     )
 
@@ -452,8 +451,10 @@ with tab_wire:
     elif wire_items is not None:
         st.info("Belum ada rilis untuk ditampilkan." if lang == 'ID' else "No releases to display.")
 
-# --- TAB 4: Riwayat ---
-with tab_history:
+# =========================================================================
+# TAB 3: ANALISIS KUANTITATIF — Rate history + backtest + correlation
+# =========================================================================
+with tab_quant:
     st.markdown("#### Riwayat Effective Federal Funds Rate" if lang == 'ID' else "#### Effective Federal Funds Rate History")
     with st.spinner("Mengambil data dari FRED..." if lang == 'ID' else "Fetching data from FRED..."):
         rate_df = data.fetch_fed_funds_rate_history(lookback_days=730)
@@ -484,17 +485,18 @@ with tab_history:
     st.caption("Sumber: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis." if lang == 'ID' else "Source: FRED series DFF (Effective Federal Funds Rate), Federal Reserve Bank of St. Louis.")
 
     st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+
     st.markdown("#### Backtest Akurasi Pasar (Fed Funds Futures)" if lang == 'ID' else "#### Market Accuracy Backtest (Fed Funds Futures)")
     st.caption(
-        "Mengevaluasi seberapa akurat tebakan pasar (menggunakan harga penutupan instrumen ZQ=F satu hari sebelum rapat) dibandingkan dengan keputusan suku bunga aktual yang diambil oleh FOMC." 
-        if lang == 'ID' else 
+        "Mengevaluasi seberapa akurat tebakan pasar (menggunakan harga penutupan instrumen ZQ=F satu hari sebelum rapat) dibandingkan dengan keputusan suku bunga aktual yang diambil oleh FOMC."
+        if lang == 'ID' else
         "Evaluates how accurately the market guessed (using ZQ=F closing prices one day prior to the meeting) compared to the actual interest rate decision taken by the FOMC."
     )
 
     if st.button("Jalankan Backtest Historis" if lang == 'ID' else "Run Historical Backtest"):
         with st.spinner("Menarik data historis dari Yahoo Finance dan menghitung akurasi..." if lang == 'ID' else "Fetching historical data from Yahoo Finance and calculating accuracy..."):
             bt_df, bt_accuracy = data.run_fomc_backtest()
-            
+
             if not bt_df.empty:
                 col_acc, col_space = st.columns([1, 3])
                 with col_acc:
@@ -506,10 +508,10 @@ with tab_history:
                                 {bt_accuracy:.1f}%
                             </div>
                         </div>
-                        """, 
+                        """,
                         unsafe_allow_html=True
                     )
-                
+
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.dataframe(
                     bt_df,
@@ -519,18 +521,59 @@ with tab_history:
             else:
                 st.error("Gagal mengambil data historis untuk backtest." if lang == 'ID' else "Failed to fetch historical data for backtest.")
 
-# --- TAB 5: AI Analysis ---
+    st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
+
+    st.markdown("#### Matriks Korelasi Aset Makro (Heatmap)" if lang == 'ID' else "#### Macro Asset Correlation Matrix (Heatmap)")
+    st.caption(
+        "Menganalisis korelasi pergerakan harian (daily returns) antar instrumen utama selama 6 bulan terakhir. Nilai mendekati +1 berarti bergerak searah (korelasi positif kuat), sedangkan mendekati -1 berlawanan arah (korelasi negatif)."
+        if lang == 'ID' else
+        "Analyzes the correlation of daily returns among major instruments over the last 6 months. A value near +1 indicates moving in the same direction (strong positive correlation), while near -1 indicates opposite directions (negative correlation)."
+    )
+
+    with st.spinner("Menghitung matriks korelasi dari Yahoo Finance..." if lang == 'ID' else "Calculating correlation matrix from Yahoo Finance..."):
+        corr_matrix = data.fetch_correlation_data(lookback_days=180)
+
+    if not corr_matrix.empty:
+        fig_corr = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns,
+            y=corr_matrix.index,
+            colorscale="RdBu",
+            zmid=0,
+            zmin=-1, zmax=1,
+            texttemplate="%{z:.2f}",
+            hoverinfo="x+y+z",
+            showscale=True
+        ))
+
+        fig_corr.update_layout(
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(color=theme["text"], family="Inter"),
+            margin=dict(l=10, r=10, t=30, b=10),
+            height=450,
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, autorange="reversed")
+        )
+
+        st.plotly_chart(fig_corr, use_container_width=True)
+    else:
+        st.error("Gagal mengambil data untuk matriks korelasi." if lang == 'ID' else "Failed to fetch data for the correlation matrix.")
+
+# =========================================================================
+# TAB 4: ANALISIS STATEMENT — unchanged, kept as its own interactive flow
+# =========================================================================
 with tab_ai:
     st.markdown("#### Analisis Sentimen Hawkish / Dovish" if lang == 'ID' else "#### Hawkish / Dovish Sentiment Analysis")
     st.caption(
-        "Tempel teks statement FOMC (atau bagian pidato Chair), atau ambil otomatis rilis resmi terakhir. AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish) sampai +100 (sangat hawkish)." 
-        if lang == 'ID' else 
+        "Tempel teks statement FOMC (atau bagian pidato Chair), atau ambil otomatis rilis resmi terakhir. AI akan menilai kecenderungan kebijakan pada skala -100 (sangat dovish) sampai +100 (sangat hawkish)."
+        if lang == 'ID' else
         "Paste FOMC statement text (or a portion of the Chair's speech), or fetch the latest official release automatically. AI will score the policy bias on a scale from -100 (highly dovish) to +100 (highly hawkish)."
     )
 
     src_opts = ["Ambil otomatis dari federalreserve.gov", "Tempel manual", "Contoh statement (Juli 2026)"]
     src_opts_en = ["Fetch automatically from federalreserve.gov", "Paste manually", "Sample statement (July 2026)"]
-    
+
     source_choice = st.radio(
         "Sumber teks" if lang == 'ID' else "Text source",
         src_opts,
@@ -556,7 +599,7 @@ with tab_ai:
         statement_text = st.text_area("Teks Statement FOMC" if lang == 'ID' else "FOMC Statement Text", value=ai_analysis.SAMPLE_STATEMENT, height=200)
     else:
         statement_text = st.text_area(
-            "Teks Statement FOMC" if lang == 'ID' else "FOMC Statement Text", value="", height=200, 
+            "Teks Statement FOMC" if lang == 'ID' else "FOMC Statement Text", value="", height=200,
             placeholder="Tempel teks statement di sini..." if lang == 'ID' else "Paste statement text here..."
         )
 
@@ -636,54 +679,12 @@ with tab_ai:
         st.plotly_chart(fig_hist, use_container_width=True)
         st.caption("Riwayat ini hanya tersimpan selama sesi browser aktif dan akan hilang saat halaman di-refresh." if lang == 'ID' else "This history is only saved during the active browser session and will be lost upon refresh.")
 
+# -------------------------------------------------------------------------
+# FOOTER
+# -------------------------------------------------------------------------
 st.markdown('<hr class="divider-line">', unsafe_allow_html=True)
 st.caption(
-    "Market Pulse adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, bukan nasihat investasi. Selalu verifikasi keputusan kebijakan resmi di federalreserve.gov." 
-    if lang == 'ID' else 
+    "Market Pulse adalah proyek edukasi dan portofolio. Data pasar dan estimasi probabilitas bersifat indikatif, bukan nasihat investasi. Selalu verifikasi keputusan kebijakan resmi di federalreserve.gov."
+    if lang == 'ID' else
     "Market Pulse is an educational and portfolio project. Market data and probability estimates are indicative, not investment advice. Always verify official policy decisions at federalreserve.gov."
 )
-
-# --- TAB 6: Correlation ---
-with tab_corr:
-    st.markdown("#### Matriks Korelasi Aset Makro (Heatmap)" if lang == 'ID' else "#### Macro Asset Correlation Matrix (Heatmap)")
-    st.caption(
-        "Menganalisis korelasi pergerakan harian (daily returns) antar instrumen utama selama 6 bulan terakhir. Nilai mendekati +1 berarti bergerak searah (korelasi positif kuat), sedangkan mendekati -1 berlawanan arah (korelasi negatif)." 
-        if lang == 'ID' else 
-        "Analyzes the correlation of daily returns among major instruments over the last 6 months. A value near +1 indicates moving in the same direction (strong positive correlation), while near -1 indicates opposite directions (negative correlation)."
-    )
-    
-    with st.spinner("Menghitung matriks korelasi dari Yahoo Finance..." if lang == 'ID' else "Calculating correlation matrix from Yahoo Finance..."):
-        corr_matrix = data.fetch_correlation_data(lookback_days=180)
-        
-    if not corr_matrix.empty:
-        colorscale = [
-            [0.0, theme["down"]],     
-            [0.5, "rgba(0,0,0,0)"],   
-            [1.0, theme["info"]]      
-        ]
-        
-        fig_corr = go.Figure(data=go.Heatmap(
-            z=corr_matrix.values,
-            x=corr_matrix.columns,
-            y=corr_matrix.index,
-            colorscale="RdBu", 
-            zmid=0, 
-            zmin=-1, zmax=1,
-            texttemplate="%{z:.2f}",
-            hoverinfo="x+y+z",
-            showscale=True
-        ))
-        
-        fig_corr.update_layout(
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            font=dict(color=theme["text"], family="Inter"),
-            margin=dict(l=10, r=10, t=30, b=10),
-            height=450,
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=False, autorange="reversed") 
-        )
-        
-        st.plotly_chart(fig_corr, use_container_width=True)
-    else:
-        st.error("Gagal mengambil data untuk matriks korelasi." if lang == 'ID' else "Failed to fetch data for the correlation matrix.")
